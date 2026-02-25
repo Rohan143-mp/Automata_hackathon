@@ -1,40 +1,91 @@
-# ROADMAP: SYNAPSE (The Bio-Digital Larynx)
+# ROADMAP: SYNAPSE
 
-## High-Level Execution Plan
+> Execution plan to evolve HealthGuard → SYNAPSE
+> Each phase delivers a **vertical slice** that can be demonstrated independently.
 
-This roadmap outlines the steps to evolve the existing HealthGuard Flutter app into the SYNAPSE inclusive learning platform, integrating the hardware pitch (smart glove + pulse sensor) with software AI (Whisper STT + Gemini TTS modulation).
+---
 
-### Phase 1: Whisper Integration (The Ear)
-**Goal:** Implement real-time speech-to-text so the student can "hear" the teacher's lessons transcribed on screen, ready for bone-conduction routing.
-- [ ] Add `record` and `path_provider` dependencies for audio capture.
-- [ ] Create `WhisperService` to handle audio recording and API calls to OpenAI Whisper.
-- [ ] Build a "Classroom/Listening" UI screen to display real-time transcriptions.
-- [ ] Add OpenAI API key configuration to `ai_config.dart`.
+## Phase 1: The Ear (Local Whisper STT)
+**Milestone:** Student can hear the classroom transcribed on-screen, fully offline.
 
-### Phase 2: IoT Telemetry Service (The Nervous System)
-**Goal:** Establish a real-time connection between the hardware ESP8266 and the Flutter app to receive sensor data.
-- [ ] Implement a WebSocket server/client in Flutter (`web_socket_channel`).
-- [ ] Define a `HardwareTelemetry` data model to parse the incoming CSV string (`<Flex1,Flex2,Flex3,Flex4,Flex5,GyroX,GyroY,HeartRate>`).
-- [ ] Create a debug UI screen to visualize live sensor data (flex bending, gyro tilt, HR).
+| # | Task | Files | Wave |
+|---|------|-------|------|
+| 1.1 | Add `whisper_ggml_plus`, `record`, `path_provider` deps | `pubspec.yaml` | 1 |
+| 1.2 | Download `ggml-tiny.en.bin` model to app assets | `assets/models/` | 1 |
+| 1.3 | Create `WhisperService` (init model, record, transcribe) | `services/whisper_service.dart` | 1 |
+| 1.4 | Build `ClassroomScreen` UI (mic button, live transcript) | `features/classroom/` | 2 |
+| 1.5 | Add route + navigation entry from dashboard | `main.dart`, `dashboard_screen.dart` | 2 |
 
-### Phase 3: The Neural-Intent Engine (The Brain)
-**Goal:** Translate raw 7D vectors (hand gestures) into context-aware speech using local matching and Gemini.
-- [ ] Create `GestureLibrary.json` with base reference vectors for common signs (e.g., "Hello", "Question", "Yes", "No").
-- [ ] Implement Cosine Similarity math function in Dart to match live telemetry against the library.
-- [ ] Update `ChatService` (or create `IntentService`) to take the matched gesture intent + current Whisper classroom context -> send to Gemini -> receive fluent sentence.
+**Demo:** Tap mic → speak into phone → text appears on screen. No internet.
 
-### Phase 4: Affective Resonance TTS (The Voice)
-**Goal:** Speak the generated sentence using Flutter TTS, modulating the voice based on the live heart rate.
-- [ ] Integrate existing `flutter_tts` package.
-- [ ] Create `VoiceService` to handle TTS output.
-- [ ] Implement logic: Map live Heart Rate (from telemetry) to TTS `pitch` and `rate` modifiers.
-    *   *High HR (>90) = Fast rate, higher pitch (Excited/Anxious).*
-    *   *Low HR (<65) = Slow rate, lower pitch (Calm).*
-- [ ] Wire the audio output to default to the headphone jack (for the PAM8403 Amp -> Bone Conduction).
+---
 
-### Phase 5: Hardware Integration & Polish (The Body)
-**Goal:** Final end-to-end testing with the physical Arduino/ESP8266 glove.
-- [ ] Refine the UI/UX for the "Wow" Demo Sequence.
-- [ ] Tune Cosine Similarity thresholds for gesture recognition accuracy.
-- [ ] Ensure robust error handling for API timeouts or WebSocket disconnects.
-- [ ] Finalize documentation and presentation materials.
+## Phase 2: The Nervous System (IoT Telemetry)
+**Milestone:** Live sensor data streams from glove → phone over WiFi.
+
+| # | Task | Files | Wave |
+|---|------|-------|------|
+| 2.1 | Add `web_socket_channel` dependency | `pubspec.yaml` | 1 |
+| 2.2 | Create `TelemetryService` (WebSocket client, CSV parser) | `services/telemetry_service.dart` | 1 |
+| 2.3 | Create `HardwareTelemetry` model (flex×5, gyro×2, HR) | `models/hardware_telemetry.dart` | 1 |
+| 2.4 | Build `GloveDebugScreen` (live sensor visualization) | `features/glove/glove_debug_screen.dart` | 2 |
+| 2.5 | Add route + navigation entry | `main.dart` | 2 |
+
+**Demo:** Bend fingers on glove → bars move on phone screen in real-time.
+
+---
+
+## Phase 3: The Brain (Neural-Intent Engine)
+**Milestone:** Student signs a gesture → system speaks a fluent, context-aware sentence.
+
+| # | Task | Files | Wave |
+|---|------|-------|------|
+| 3.1 | Create `GestureLibrary.json` (reference vectors for 10+ gestures) | `assets/gesture_library.json` | 1 |
+| 3.2 | Implement `GestureEngine` (cosine similarity matching in Dart) | `services/gesture_engine.dart` | 1 |
+| 3.3 | Create `IntentService` (gesture intent + Whisper context → Gemini → sentence) | `services/intent_service.dart` | 2 |
+| 3.4 | Build `GloveScreen` (shows matched gesture, generated sentence, speak button) | `features/glove/glove_screen.dart` | 2 |
+
+**Demo:** Sign "Hello" → screen shows "Hello everyone, nice to meet you." → phone speaks it.
+
+---
+
+## Phase 4: The Voice (Affective Resonance TTS)
+**Milestone:** Generated speech has emotion — pitch and speed change with heart rate.
+
+| # | Task | Files | Wave |
+|---|------|-------|------|
+| 4.1 | Create `VoiceService` (wraps `flutter_tts`, accepts HR parameter) | `services/voice_service.dart` | 1 |
+| 4.2 | Implement HR→pitch/rate mapping table | `services/voice_service.dart` | 1 |
+| 4.3 | Wire end-to-end: TelemetryService HR → VoiceService → TTS output | `features/glove/glove_screen.dart` | 2 |
+
+**Demo:** Jog in place (HR rises) → sign "Win" → voice says "We're going to WIN!" in an excited tone.
+
+---
+
+## Phase 5: The Body (Integration & Polish)
+**Milestone:** End-to-end demo-ready. All systems working together.
+
+| # | Task | Files | Wave |
+|---|------|-------|------|
+| 5.1 | Rebrand app from HealthGuard → SYNAPSE (app name, theme, splash) | Multiple UI files | 1 |
+| 5.2 | Create unified "Synapse Mode" screen (gesture + transcript + voice in one view) | `features/synapse/synapse_screen.dart` | 1 |
+| 5.3 | Tune cosine similarity thresholds with real glove data | `assets/gesture_library.json` | 2 |
+| 5.4 | Add error recovery (WebSocket reconnect, model reload) | Services layer | 2 |
+| 5.5 | Demo rehearsal and timing optimization | — | 3 |
+
+**Demo:** The full "Wow" sequence from the pitch document.
+
+---
+
+## Dependency Graph
+
+```
+Phase 1 (Ear)  ──┐
+                  ├──▶ Phase 3 (Brain) ──▶ Phase 4 (Voice) ──▶ Phase 5 (Body)
+Phase 2 (Nerves) ┘
+```
+
+Phases 1 and 2 are **independent** and can be built in parallel.
+Phase 3 requires both (gesture vectors from Phase 2 + classroom context from Phase 1).
+Phase 4 requires Phase 3 (needs sentences to speak).
+Phase 5 integrates everything.
