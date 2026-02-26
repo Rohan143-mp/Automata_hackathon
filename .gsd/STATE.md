@@ -10,7 +10,7 @@ On 2026-02-25, completely pivoted project to actualize **SYNAPSE (The Bio-Digita
 - Phase 1 executed successfully. 2 plans, 6 tasks completed (PC Hub Whisper WebSocket Server + Flutter Audio Stream Service).
 
 ## Current Position
-- **Phase**: 2 (completed)
+- **Phase**: 3 (completed)
 - **Task**: All tasks complete
 - **Status**: Verified
 
@@ -32,5 +32,4 @@ On 2026-02-25, completely pivoted project to actualize **SYNAPSE (The Bio-Digita
 - Vector matching is resilient to shaky hands unlike raw if/else thresholds.
 
 ## Next Steps
-1. Proceed to Phase 3 (PC Hub Processing).
-2. Wire the physical glove hardware based on `hardware/wiring_guide.md` if not already completed.
+1. Proceed to Phase 4 (PC Hub Processing) to add TTS logic.
