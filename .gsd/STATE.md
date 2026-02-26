@@ -9,19 +9,19 @@ On 2026-02-25, completely pivoted project to actualize **SYNAPSE (The Bio-Digita
 - Re-architected data flow to rely on ESP8266 WebSocket streaming instead of USB serial.
 
 ## Current Position
-- **Phase**: 1 & 2 (The Ear & The IoT Glove)
-- **Task**: Plans completely overhauled and finalized for Hardware+Software integration
-- **Status**: Ready to procure BOM or build mock software layers.
+- **Phase**: 1
+- **Task**: Planning complete
+- **Status**: Ready for execution
 
 ## Technology Decisions
 | Decision | Choice | Why |
 |----------|--------|-----|
 | Central Brain | PC Hub (Python) | Processes Whisper, Cosine Similarity, and Ollama in one beefy local machine |
-| App Role | Audio Source & Telemetry | App captures mic audio and sends to PC, while listening to WebSocket to display the final state |
+| App Role | Mic & Display Dashboard | App captures mic audio and sends to PC. It runs ZERO logic, but displays detected signs (e.g. "I Miran") and expansions (e.g. "I am Miran") |
 | Audio Recording | `record` package (Flutter) | Modern, robust Flutter audio capturing library for capturing classroom context |
 | Local Whisper | faster-whisper (Python) | running on the PC Hub, parses the audio chunks sent by the Flutter App |
 | Microcontrollers | Arduino Uno + ESP8266 | Split-brain architecture: 5V analog muscles (Uno) + 3.3V WiFi brain (ESP) |
-| Hub Sync | Python WebSocket Server | Receives Audio/Vectors, and streams Transcripts and LLM output back to the App |
+| Hub Sync | Python WebSocket Server | Receives Audio/Vectors, and streams Transcripts and inferred signs back to the App |
 | Output Audio | PAM8403 + Bone Conduction | Phantom voice feedback creates neurological loop of speaking |
 | AI Intent | Local Ollama (Python layer) | Translates shorthand phrases locally, ensuring ultra-low latency, privacy, and full offline capability without API keys |
 
@@ -32,5 +32,5 @@ On 2026-02-25, completely pivoted project to actualize **SYNAPSE (The Bio-Digita
 
 ## Next Steps
 1. Procure missing hardware (Pulse Sensor, Bone Conduction, Capacitors).
-2. Execute Phase 1 (Whisper context pipeline) locally.
+2. /execute 1
 3. Build Phase 2 Mock Data generator until hardware is assembled.
