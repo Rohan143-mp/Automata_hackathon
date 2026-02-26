@@ -1,93 +1,83 @@
+"""
+simulate_glove.py — SYNAPSE Smart Glove Simulator
+===================================================
+Pipe named gesture shortcuts directly into the Hub's WebSocket (port 81)
+without any physical hardware connected.
+
+Usage:
+  python scripts/simulate_glove.py
+
+Commands:
+  question   → Sign for asking a question
+  help       → Sign for needing help
+  yes        → Sign for yes/agreement
+  no         → Sign for no/disagreement
+  repeat     → Sign for "please repeat that"
+  hr <num>   → Set heart rate for next packet (default: 75)
+  quit / q   → Exit
+"""
+
 import asyncio
 import websockets
-import time
-import math
-import argparse
-import sys
-import select
 
-# Default stable hand state (flat open hand)
-# F1-F5: 0-1023 (Open ~ 800, Closed ~ 300)
-# GX, GY: degrees/sec
-# HR: 60-120 BPM
-state = {
-    'f1': 800, 'f2': 800, 'f3': 800, 'f4': 800, 'f5': 800,
-    'gx': 0.0, 'gy': 0.0,
-    'hr': 75
+HUB_WS_URL = "ws://localhost:81"
+
+# Named gesture → 7D vector [Thumb, Index, Middle, Ring, Pinky, GyroX, GyroY]
+GESTURE_LIBRARY = {
+    "question":  [0.9, 0.1, 0.1, 0.1, 0.9, 0.1, -0.3],
+    "help":      [0.9, 0.9, 0.9, 0.9, 0.9, 0.0, 0.0],
+    "yes":       [0.9, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2],
+    "no":        [0.0, 0.9, 0.9, 0.0, 0.0, -0.1, 0.0],
+    "repeat":    [0.5, 0.9, 0.9, 0.9, 0.0, 0.0, 0.5],
 }
 
-# Pre-defined mock gestures
-GESTURES = {
-    'open': {'f1': 800, 'f2': 800, 'f3': 800, 'f4': 800, 'f5': 800},
-    'fist': {'f1': 300, 'f2': 300, 'f3': 300, 'f4': 300, 'f5': 300},
-    'point': {'f1': 300, 'f2': 800, 'f3': 300, 'f4': 300, 'f5': 300},
-    'peace': {'f1': 300, 'f2': 800, 'f3': 800, 'f4': 300, 'f5': 300},
-}
+heart_rate = 75  # Default BPM
 
-def get_current_state_csv(time_t):
-    """Generates the CSV string with slight noise added to simulate real sensors."""
-    # Add slight sine-wave noise to flex sensors (+/- 10)
-    noise = int(math.sin(time_t * 5) * 10)
-    
-    # Format: <F1,F2,F3,F4,F5,GX,GY,HR>
-    csv = f"<{state['f1']+noise},{state['f2']+noise},{state['f3']+noise},{state['f4']+noise},{state['f5']+noise},{state['gx']:.2f},{state['gy']:.2f},{state['hr']}>"
-    return csv
 
-async def stream_data(websocket):
-    print(f"[Client Connected] Streaming mock data to {websocket.remote_address}")
-    try:
-        start_time = time.time()
+def format_packet(vector: list, hr: int) -> str:
+    vals = ",".join(f"{v:.2f}" for v in vector)
+    return f"<{vals},{hr}>"
+
+
+async def run():
+    global heart_rate
+    print("=" * 52)
+    print("   SYNAPSE GLOVE SIMULATOR — Dev Tool")
+    print("=" * 52)
+    print("Gestures: question | help | yes | no | repeat")
+    print("Heart Rate: hr <num>  (default: 75)")
+    print("Quit: q")
+    print()
+
+    async with websockets.connect(HUB_WS_URL) as ws:
+        print(f"[Simulator] Connected to Hub at {HUB_WS_URL}\n")
+
         while True:
-            # Check for non-blocking standard input (CLI commands)
-            if sys.platform != 'win32':
-                # select works on Unix-like
-                i, _, _ = select.select([sys.stdin], [], [], 0.0)
-                if i:
-                    cmd = sys.stdin.readline().strip().lower()
-                    process_cmd(cmd)
-            
-            # Send data at 50Hz (0.02s)
-            current_time = time.time() - start_time
-            csv_data = get_current_state_csv(current_time)
-            
-            await websocket.send(csv_data)
-            await asyncio.sleep(0.02)
-            
-    except websockets.exceptions.ConnectionClosed:
-        print(f"[Client Disconnected] {websocket.remote_address}")
+            cmd = input(">>> ").strip().lower()
 
-def process_cmd(cmd):
-    global state
-    if cmd in GESTURES:
-        print(f"--> Switching to gesture: {cmd.upper()}")
-        state.update(GESTURES[cmd])
-    elif cmd.startswith('hr '):
-        try:
-            new_hr = int(cmd.split(' ')[1])
-            state['hr'] = new_hr
-            print(f"--> Heart rate set to: {new_hr}")
-        except:
-            print("Invalid format. Use: hr 85")
-    else:
-        print(f"Unknown command: '{cmd}'. Try: 'open', 'fist', 'point', 'peace', 'hr <bpm>'")
+            if cmd in ("q", "quit", "exit"):
+                print("[Simulator] Exiting.")
+                break
 
-async def main():
-    parser = argparse.ArgumentParser(description="SYNAPSE Mock Glove Generator")
-    parser.add_argument("--port", type=int, default=81, help="WebSocket port (default: 81)")
-    args = parser.parse_args()
+            elif cmd.startswith("hr "):
+                try:
+                    heart_rate = int(cmd.split()[1])
+                    print(f"[Simulator] Heart rate set to {heart_rate} BPM")
+                except (IndexError, ValueError):
+                    print("[Simulator] Usage: hr <number>")
 
-    print(f"Starting SYNAPSE Mock Glove Server on ws://localhost:{args.port}...")
-    print("---------------------------------------------------------")
-    print("Available Commands (type directly in console):")
-    print("- Gestures: 'open', 'fist', 'point', 'peace'")
-    print("- Vitals:   'hr 85'")
-    print("---------------------------------------------------------")
+            elif cmd in GESTURE_LIBRARY:
+                vector = GESTURE_LIBRARY[cmd]
+                packet = format_packet(vector, heart_rate)
+                await ws.send(packet)
+                print(f"[Simulator] Sent: {packet}")
 
-    async with websockets.serve(stream_data, "localhost", args.port):
-        await asyncio.Future()  # run forever
+            elif cmd == "":
+                pass  # ignore empty input
+
+            else:
+                print(f"[Simulator] Unknown gesture '{cmd}'. Try: {', '.join(GESTURE_LIBRARY.keys())}")
+
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("\nServer shutting down.")
+    asyncio.run(run())

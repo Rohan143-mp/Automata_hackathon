@@ -70,6 +70,7 @@
 | 5.4 | Rehearse 5-Step Demo (The Silence, Connection, Intelligence, Emotion, Climax) | Docs | 3 |
 
 ## Phase 6: Dockerization (Environment Harmony)
+**Status**: ✅ Complete
 **Milestone:** Complete project containerization to eliminate "it works on my machine" issues. Hub, Backend, and Database all running in a single `docker-compose` network.
 
 | # | Task | Target | Wave |
@@ -82,6 +83,7 @@
 ---
 
 ## Phase 7: The Developer Cockpit (Quality of Life)
+**Status**: ✅ Complete
 **Milestone:** A suite of internal tools to speed up iteration for the PC Hub and IoT transitions.
 
 | # | Task | Target | Wave |

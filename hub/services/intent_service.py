@@ -1,7 +1,9 @@
 import requests
 import json
+import os
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+OLLAMA_URL = f"{OLLAMA_HOST}/api/generate"
 # Assuming 'llama3' or 'phi3' is running locally
 MODEL_NAME = "llama3"
 

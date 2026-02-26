@@ -53,24 +53,35 @@ async def ingest_glove_data():
                                     
                                     if intent:
                                         last_match_time = current_time
+                                        t_pipeline_start = time.perf_counter()
                                         print(f"\n[Glove Match]: Hand state identified as '{intent.upper()}'")
                                         
                                         # 1. Grab Context
                                         context = get_recent_transcript()
+                                        t_context = time.perf_counter()
                                         
                                         # 2. Ask Ollama for fluent speech
                                         print(f"[Ollama] Translating intent using context: '{context}'...")
                                         speech = generate_fluent_speech(intent, context)
+                                        t_ollama = time.perf_counter()
                                         print(f"[Speech Output]: \"{speech}\"")
                                         
                                         # 3. Speak Out Loud via TTS (Affective Resonance)
                                         speed_mult = calculate_vocal_params(hr)
                                         print(f"[Affective Resonance] Heart Rate {hr} BPM mapped to {speed_mult}x multiplier.")
                                         speak_text(speech, speed=speed_mult)
+                                        t_tts = time.perf_counter()
                                         
                                         # 4. Broadcast to the Flutter UI (Sync with HR)
-                                        # Appending the dynamically recorded HR so the UI can update its colors/pulse rate
                                         await broadcast_telemetry(intent, f"{speech} (BPM: {hr})")
+                                        t_broadcast = time.perf_counter()
+                                        
+                                        # --- Latency Probe ---
+                                        total_ms = (t_broadcast - t_pipeline_start) * 1000
+                                        ollama_ms = (t_ollama - t_context) * 1000
+                                        tts_ms = (t_tts - t_ollama) * 1000
+                                        broadcast_ms = (t_broadcast - t_tts) * 1000
+                                        print(f"[Latency Probe] Total: {total_ms:.1f}ms | Ollama: {ollama_ms:.1f}ms | TTS: {tts_ms:.1f}ms | Broadcast: {broadcast_ms:.1f}ms")
                                         
                             except ValueError as e:
                                 print(f"Value Parsing Error: {e} with payload {data_str}")
