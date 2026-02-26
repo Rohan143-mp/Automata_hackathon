@@ -6,6 +6,8 @@ import time
 from services.gesture_engine import match_gesture
 from services.intent_service import generate_fluent_speech
 from services.app_sync_service import start_app_sync_server, broadcast_telemetry
+from services.voice_service import speak_text
+from services.affective_resonance import calculate_vocal_params
 
 GLOVE_WS_URL = "ws://localhost:81"
 
@@ -61,8 +63,14 @@ async def ingest_glove_data():
                                         speech = generate_fluent_speech(intent, context)
                                         print(f"[Speech Output]: \"{speech}\"")
                                         
-                                        # 3. Broadcast to the Flutter UI
-                                        await broadcast_telemetry(intent, speech)
+                                        # 3. Speak Out Loud via TTS (Affective Resonance)
+                                        speed_mult = calculate_vocal_params(hr)
+                                        print(f"[Affective Resonance] Heart Rate {hr} BPM mapped to {speed_mult}x multiplier.")
+                                        speak_text(speech, speed=speed_mult)
+                                        
+                                        # 4. Broadcast to the Flutter UI (Sync with HR)
+                                        # Appending the dynamically recorded HR so the UI can update its colors/pulse rate
+                                        await broadcast_telemetry(intent, f"{speech} (BPM: {hr})")
                                         
                             except ValueError as e:
                                 print(f"Value Parsing Error: {e} with payload {data_str}")
