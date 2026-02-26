@@ -5,7 +5,10 @@ import 'package:mobile/models/risk_result.dart';
 
 class ApiService {
   // 10.0.2.2 = Android emulator; 10.150.48.138 = PC Wi-Fi IP for physical device
-  static const String baseUrl = 'https://tknz9w00-3000.inc1.devtunnels.ms';
+  static const String baseUrl = String.fromEnvironment(
+    'BACKEND_URL',
+    defaultValue: 'http://localhost:3000',
+  );
   // Doctor session info
   static String? currentDoctorId;
   static String? currentDoctorName;

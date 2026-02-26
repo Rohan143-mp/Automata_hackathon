@@ -8,6 +8,9 @@ const char* WIFI_PASSWORD = "password123";
 // WebSocket Server on Port 81
 WebSocketsServer webSocket(81);
 
+// Thumb Flex Sensor on ESP8266's only analog pin
+const int THUMB_PIN = A0;
+
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
   switch (type) {
     case WStype_DISCONNECTED:
@@ -23,8 +26,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
 }
 
 void setup() {
-  // Start Serial (Connected to Arduino Nano TX)
-  // Ensure the baud rate matches exactly!
+  // Start Serial (Connected to Arduino Uno TX)
   Serial.begin(115200);
 
   // Connect to WiFi network
@@ -48,17 +50,26 @@ void setup() {
 void loop() {
   webSocket.loop();
 
-  // Read incoming Serial lines from Arduino Nano
+  // Read incoming Serial lines from Arduino Uno
   if (Serial.available()) {
     String dataStr = Serial.readStringUntil('\n');
-
-    // Strip trailing \r if present
     dataStr.trim();
 
-    // Check if the data looks like a valid CSV packet: <F1,F2,F3,F4,F5,GX,GY,HR>
+    // Check if the data looks like a valid CSV packet from Uno: <Index,Middle,Ring,Pinky,GX,GY>
     if (dataStr.startsWith("<") && dataStr.endsWith(">")) {
-      // Broadcast the string to all connected WebSocket clients
-      webSocket.broadcastTXT(dataStr);
+      // Read Thumb flex sensor from ESP8266's own A0 pin
+      int thumbValue = analogRead(THUMB_PIN);
+
+      // Strip angle brackets to get the raw CSV
+      String csvFromUno = dataStr.substring(1, dataStr.length() - 1);
+
+      // Merge: Prepend Thumb (F1) at the beginning
+      // Uno sends:   Index,Middle,Ring,Pinky,GX,GY
+      // We produce:  Thumb,Index,Middle,Ring,Pinky,GX,GY
+      String mergedPacket = "<" + String(thumbValue) + "," + csvFromUno + ">";
+
+      // Broadcast the merged 7D vector to all connected WebSocket clients
+      webSocket.broadcastTXT(mergedPacket);
     }
   }
 }

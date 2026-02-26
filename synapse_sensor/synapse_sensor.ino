@@ -3,15 +3,12 @@
 
 MPU6050 mpu;
 
-// Flex Sensor Pins
-const int FLEX1_PIN = A0; // Thumb
-const int FLEX2_PIN = A1; // Index
-const int FLEX3_PIN = A2; // Middle
-const int FLEX4_PIN = A3; // Ring
-const int FLEX5_PIN = A6; // Pinky
-
-// Pulse Sensor Pin
-const int PULSE_PIN = A7; // Heart rate
+// Flex Sensor Pins (Arduino Uno: A0-A3 available, A4/A5 used by I2C)
+// NOTE: Thumb flex sensor is wired to ESP8266 A0 (Uno has no free analog pins)
+const int FLEX_INDEX_PIN  = A0; // Index
+const int FLEX_MIDDLE_PIN = A1; // Middle
+const int FLEX_RING_PIN   = A2; // Ring
+const int FLEX_PINKY_PIN  = A3; // Pinky
 
 // Timing logic for 50Hz transmission rate
 unsigned long lastTime = 0;
@@ -35,15 +32,11 @@ void loop() {
   if (currentTime - lastTime >= UPDATE_INTERVAL) {
     lastTime = currentTime;
 
-    // Read Flex Sensors
-    int f1 = analogRead(FLEX1_PIN);
-    int f2 = analogRead(FLEX2_PIN);
-    int f3 = analogRead(FLEX3_PIN);
-    int f4 = analogRead(FLEX4_PIN);
-    int f5 = analogRead(FLEX5_PIN);
-
-    // Read Pulse Sensor
-    int hr = analogRead(PULSE_PIN);
+    // Read Flex Sensors (4 fingers — Thumb is on ESP8266)
+    int fIndex  = analogRead(FLEX_INDEX_PIN);
+    int fMiddle = analogRead(FLEX_MIDDLE_PIN);
+    int fRing   = analogRead(FLEX_RING_PIN);
+    int fPinky  = analogRead(FLEX_PINKY_PIN);
 
     // Read MPU6050
     int16_t ax, ay, az, gx, gy, gz;
@@ -53,16 +46,15 @@ void loop() {
     float gyroX = gx / 131.0;
     float gyroY = gy / 131.0;
 
-    // Format output as CSV: <F1,F2,F3,F4,F5,GX,GY,HR>
+    // Format output as CSV: <Index,Middle,Ring,Pinky,GX,GY>
+    // ESP8266 will prepend Thumb (F1) before broadcasting
     Serial.print("<");
-    Serial.print(f1); Serial.print(",");
-    Serial.print(f2); Serial.print(",");
-    Serial.print(f3); Serial.print(",");
-    Serial.print(f4); Serial.print(",");
-    Serial.print(f5); Serial.print(",");
-    Serial.print(gyroX, 2); Serial.print(","); // 2 decimal places for accuracy
-    Serial.print(gyroY, 2); Serial.print(",");
-    Serial.print(hr);
+    Serial.print(fIndex);  Serial.print(",");
+    Serial.print(fMiddle); Serial.print(",");
+    Serial.print(fRing);   Serial.print(",");
+    Serial.print(fPinky);  Serial.print(",");
+    Serial.print(gyroX, 2); Serial.print(",");
+    Serial.print(gyroY, 2);
     Serial.println(">");
   }
 }

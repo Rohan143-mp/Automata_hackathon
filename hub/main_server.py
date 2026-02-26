@@ -12,7 +12,9 @@ from services.gesture_engine import match_gesture
 from services.intent_service import generate_fluent_speech
 from services.app_sync_service import start_app_sync_server, broadcast_telemetry
 from services.voice_service import speak_text
-from services.affective_resonance import calculate_vocal_params
+# NOTE: Affective Resonance disabled — no pulse sensor in hardware
+# from services.affective_resonance import calculate_vocal_params
+DEFAULT_SPEED = 1.0  # Fixed TTS speed (no heart rate modulation)
 
 GLOVE_WS_URL = "ws://localhost:81"
 
@@ -33,17 +35,16 @@ async def ingest_glove_data():
                 print(f"[PC Hub] Connected to Glove Data Stream!")
                 
                 async for message in websocket:
-                    # Expecting format: <F1,F2,F3,F4,F5,GX,GY,HR>
+                    # Expecting format: <F1,F2,F3,F4,F5,GX,GY> (7 values, no HR)
                     msg = message.strip()
                     if msg.startswith("<") and msg.endswith(">"):
                         data_str = msg[1:-1]
                         parts = data_str.split(',')
                         
-                        if len(parts) == 8:
+                        if len(parts) == 7:
                             try:
-                                # Parse out 7D vector
+                                # Parse out 7D vector (5 fingers + 2 gyro)
                                 vector = [float(p) for p in parts[:7]]
-                                hr = int(parts[7])
                                 
                                 current_time = time.time()
                                 
@@ -66,14 +67,12 @@ async def ingest_glove_data():
                                         t_ollama = time.perf_counter()
                                         print(f"[Speech Output]: \"{speech}\"")
                                         
-                                        # 3. Speak Out Loud via TTS (Affective Resonance)
-                                        speed_mult = calculate_vocal_params(hr)
-                                        print(f"[Affective Resonance] Heart Rate {hr} BPM mapped to {speed_mult}x multiplier.")
-                                        speak_text(speech, speed=speed_mult)
+                                        # 3. Speak Out Loud via TTS (fixed speed — no pulse sensor)
+                                        speak_text(speech, speed=DEFAULT_SPEED)
                                         t_tts = time.perf_counter()
                                         
-                                        # 4. Broadcast to the Flutter UI (Sync with HR)
-                                        await broadcast_telemetry(intent, f"{speech} (BPM: {hr})")
+                                        # 4. Broadcast to the Flutter UI
+                                        await broadcast_telemetry(intent, speech)
                                         t_broadcast = time.perf_counter()
                                         
                                         # --- Latency Probe ---
