@@ -3,9 +3,17 @@ import json
 import random
 import time
 import ollama
+import docker
+import os
 
 # Create an MCP server
 mcp = FastMCP("SYNAPSE Hub Services")
+
+# Initialize Docker client
+try:
+    docker_client = docker.from_env()
+except Exception:
+    docker_client = None
 
 @mcp.tool()
 def list_ollama_models() -> str:
@@ -76,6 +84,52 @@ def latency_probe() -> str:
             "ollama": 300,
             "websocket": 10
         }
+    }, indent=2)
+
+@mcp.tool()
+def get_docker_status() -> str:
+    """
+    Lists all Docker containers and their current status.
+    """
+    if not docker_client:
+        return "Docker client not initialized. Ensure Docker is running."
+    
+    try:
+        containers = docker_client.containers.list(all=True)
+        result = []
+        for c in containers:
+            result.append({
+                "name": c.name,
+                "status": c.status,
+                "image": str(c.image.tags[0]) if c.image.tags else "unknown"
+            })
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return f"Error connecting to Docker: {e}"
+
+@mcp.tool()
+def system_check() -> str:
+    """
+    Performs a health check on local services (Ollama & Docker).
+    """
+    ollama_ok = False
+    try:
+        ollama.list()
+        ollama_ok = True
+    except:
+        pass
+        
+    docker_ok = docker_client is not None
+    try:
+        if docker_ok:
+            docker_client.ping()
+    except:
+        docker_ok = False
+        
+    return json.dumps({
+        "ollama": "running" if ollama_ok else "offline",
+        "docker": "running" if docker_ok else "offline",
+        "timestamp": time.ctime()
     }, indent=2)
 
 if __name__ == "__main__":
