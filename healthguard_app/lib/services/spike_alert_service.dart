@@ -60,7 +60,8 @@ class SpikeAlertService {
         'Current location: $mapsUrl';
 
     // Notify backend (logs it, ready for Twilio in production)
-    await ApiService().reportSpike(patientId, heartRate, lat, lng);
+    // Non-blocking: Fire and forget to ensure SMS launches within 5s
+    ApiService().reportSpike(patientId, heartRate, lat, lng);
 
     // Send SMS to emergency contact via device SMS app
     if (emergencyContact.isNotEmpty) {
