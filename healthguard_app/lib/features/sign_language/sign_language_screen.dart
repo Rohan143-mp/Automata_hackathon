@@ -28,8 +28,9 @@ class _SignLanguageScreenState extends State<SignLanguageScreen>
   // ── 5 finger flex values: Thumb, Index, Middle, Ring, Pinky ────────────
   List<double> _flexValues = [0, 0, 0, 0, 0];
 
-  String _latestIntent = "Waiting for gesture...";
+  String _displayedIntent = "";
   String _latestSpeech = "";
+  bool _isSpeechVisible = false;
 
   // Animation controller for the hand icon pulse
   late AnimationController _pulseController;
@@ -48,18 +49,45 @@ class _SignLanguageScreenState extends State<SignLanguageScreen>
   }
 
   // ── Mock data generator ────────────────────────────────────────────────
+  // ── Word-by-word animation logic ──────────────────────────────────────
+  Future<void> _animateIntent(String intent, String speech) async {
+    if (!mounted) return;
+
+    setState(() {
+      _displayedIntent = "";
+      _isSpeechVisible = false;
+    });
+
+    final words = intent.split(' ');
+    for (int i = 0; i < words.length; i++) {
+      if (!mounted) return;
+      await Future.delayed(const Duration(milliseconds: 500));
+      setState(() {
+        _displayedIntent = words.take(i + 1).join(' ');
+      });
+    }
+
+    // Show speech after all words are revealed
+    if (!mounted) return;
+    await Future.delayed(const Duration(milliseconds: 600));
+    setState(() {
+      _latestSpeech = speech;
+      _isSpeechVisible = true;
+    });
+  }
+
+  // ── Mock data generator ────────────────────────────────────────────────
   void _startMockData() {
     _stopMockData();
 
     // Initial 2-second delay before starting mock data
     Future.delayed(const Duration(seconds: 2), () {
-      // Show the first gesture immediately after the delay
+      if (!mounted) return;
+
+      // Show the first gesture with animation immediately after the delay
       final gesture = _mockGestures[_mockGestureIndex];
-      setState(() {
-        _latestIntent = gesture['intent']!;
-        _latestSpeech = gesture['speech']!;
-        _mockGestureIndex = (_mockGestureIndex + 1) % _mockGestures.length;
-      });
+      _animateIntent(gesture['intent']!, gesture['speech']!);
+      _mockGestureIndex = (_mockGestureIndex + 1) % _mockGestures.length;
 
       // Update flex values with high-variance randomization for a realistic "live" look
       _mockFlexTimer = Timer.periodic(const Duration(milliseconds: 140), (_) {
@@ -87,12 +115,9 @@ class _SignLanguageScreenState extends State<SignLanguageScreen>
           timer.cancel();
           return;
         }
-        setState(() {
-          final gesture = _mockGestures[_mockGestureIndex];
-          _latestIntent = gesture['intent']!;
-          _latestSpeech = gesture['speech']!;
-          _mockGestureIndex = (_mockGestureIndex + 1) % _mockGestures.length;
-        });
+        final gesture = _mockGestures[_mockGestureIndex];
+        _animateIntent(gesture['intent']!, gesture['speech']!);
+        _mockGestureIndex = (_mockGestureIndex + 1) % _mockGestures.length;
       });
     });
   }
@@ -370,7 +395,9 @@ class _SignLanguageScreenState extends State<SignLanguageScreen>
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      _latestIntent.toUpperCase(),
+                      _displayedIntent.isEmpty
+                          ? "WAITING..."
+                          : _displayedIntent.toUpperCase(),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 24,
@@ -378,43 +405,45 @@ class _SignLanguageScreenState extends State<SignLanguageScreen>
                         letterSpacing: 1.2,
                       ),
                     ),
-                    const Divider(color: Colors.white30, height: 28),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.record_voice_over,
-                          color: Colors.white70,
+                    if (_isSpeechVisible) ...[
+                      const Divider(color: Colors.white30, height: 28),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.record_voice_over,
+                            color: Colors.white70,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'LLM Fluent Speech:',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.9),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'LLM Fluent Speech:',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
-                            fontSize: 14,
+                        child: Text(
+                          _latestSpeech.isEmpty
+                              ? "Waiting for Ollama..."
+                              : '"$_latestSpeech"',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontStyle: FontStyle.italic,
+                            height: 1.4,
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Text(
-                        _latestSpeech.isEmpty
-                            ? "Waiting for Ollama..."
-                            : '"$_latestSpeech"',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontStyle: FontStyle.italic,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
+                    ],
                   ],
                 ),
               ),
