@@ -27,7 +27,7 @@ class CustomBottomNavBar extends StatelessWidget {
         BottomNavigationBarItem(icon: Icon(Icons.sign_language), label: 'Sign'),
         BottomNavigationBarItem(
           icon: Icon(Icons.psychology),
-          label: 'Offline AI',
+          label: 'AI Tutor',
         ),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
       ],

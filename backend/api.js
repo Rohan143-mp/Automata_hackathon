@@ -11,6 +11,9 @@ initDB().then((db) => {
 // ── Ollama proxy — no DB needed, mount BEFORE the DB-guard middleware ──
 app.use("/ollama", require("./ollama"));
 
+// ── Speech-to-text (Whisper) — no DB needed, mount BEFORE the DB-guard middleware ──
+app.use("/speech", require("./speech"));
+
 // ── Simple health-check (no DB) ──
 app.get("/", (req, res) => {
   res.send("Nodemon is watching for changes!");

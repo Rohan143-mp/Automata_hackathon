@@ -5,7 +5,6 @@ import '../../core/constants/app_constants.dart';
 import '../vitals/vitals_screen.dart';
 
 import '../profile/profile_screen.dart';
-import '../chat_assistant/chat_screen.dart';
 import '../sign_language/sign_language_screen.dart';
 import '../offline_ai/offline_ai_screen.dart';
 
@@ -550,18 +549,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
       ),
-      floatingActionButton: _currentIndex == 0
-          ? FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ChatScreen()),
-                );
-              },
-              tooltip: 'Chatbot',
-              child: const Icon(Icons.chat_bubble),
-            )
-          : null,
     );
   }
 

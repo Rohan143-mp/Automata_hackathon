@@ -69,7 +69,7 @@ class _SignLanguageScreenState extends State<SignLanguageScreen>
 
     // Show speech after all words are revealed
     if (!mounted) return;
-    await Future.delayed(const Duration(milliseconds: 600));
+    await Future.delayed(const Duration(milliseconds: 2000));
     setState(() {
       _latestSpeech = speech;
       _isSpeechVisible = true;
