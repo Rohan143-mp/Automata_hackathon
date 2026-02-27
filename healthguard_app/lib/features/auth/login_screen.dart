@@ -84,13 +84,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Login as Patient'),
+                    : const Text('Login as Student'),
               ),
               const SizedBox(height: 16),
               TextButton(
                 onPressed: _isLoading
                     ? null
-                    : () => Navigator.pushNamed(context, AppConstants.signupRoute),
+                    : () => Navigator.pushNamed(
+                        context,
+                        AppConstants.signupRoute,
+                      ),
                 child: const Text('Don\'t have an account? Sign up'),
               ),
               const SizedBox(height: 24),
@@ -104,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         await _apiService.signUp(
                           'testuser',
                           'password123',
-                          'Test Patient',
+                          'Test Student',
                         );
                         final success = await _apiService.login(
                           'testuser',

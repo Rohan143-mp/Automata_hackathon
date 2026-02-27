@@ -101,6 +101,7 @@ class _SignupScreenState extends State<SignupScreen> {
       ApiService.currentGender = _gender;
       ApiService.healthCategories = _selectedCategories.toList();
       ApiService.emergencyContact = _emergencyCtrl.text.trim();
+      ApiService.currentStudentName = _nameCtrl.text.trim();
       if (_isFemale) {
         ApiService.lastPeriodDate = _lastPeriodDate;
         ApiService.menstrualCycleLength =
@@ -131,21 +132,25 @@ class _SignupScreenState extends State<SignupScreen> {
   // ─── UI helpers ───────────────────────────────────────────────────────────
 
   Widget _sectionHeader(String title) => Padding(
-        padding: const EdgeInsets.only(top: 24, bottom: 8),
-        child: Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 15,
-            color: Colors.teal,
-          ),
-        ),
-      );
+    padding: const EdgeInsets.only(top: 24, bottom: 8),
+    child: Text(
+      title,
+      style: const TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 15,
+        color: Colors.teal,
+      ),
+    ),
+  );
 
   Widget _genderChip(String label, IconData icon) {
     final selected = _gender == label;
     return ChoiceChip(
-      avatar: Icon(icon, size: 18, color: selected ? Colors.white : Colors.teal),
+      avatar: Icon(
+        icon,
+        size: 18,
+        color: selected ? Colors.white : Colors.teal,
+      ),
       label: Text(label),
       selected: selected,
       selectedColor: Colors.teal,
@@ -170,7 +175,11 @@ class _SignupScreenState extends State<SignupScreen> {
       secondary: CircleAvatar(
         radius: 18,
         backgroundColor: selected ? Colors.teal : Colors.grey[200],
-        child: Icon(cat.icon, size: 18, color: selected ? Colors.white : Colors.teal),
+        child: Icon(
+          cat.icon,
+          size: 18,
+          color: selected ? Colors.white : Colors.teal,
+        ),
       ),
       title: Text(cat.label, style: const TextStyle(fontSize: 14)),
       controlAffinity: ListTileControlAffinity.trailing,
@@ -204,8 +213,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.person),
                   ),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Enter your name' : null,
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? 'Enter your name'
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -215,8 +225,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.alternate_email),
                   ),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Enter a username' : null,
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? 'Enter a username'
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -226,9 +237,11 @@ class _SignupScreenState extends State<SignupScreen> {
                     border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.lock),
                     suffixIcon: IconButton(
-                      icon: Icon(_obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility),
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
                       onPressed: () =>
                           setState(() => _obscurePassword = !_obscurePassword),
                     ),
@@ -247,9 +260,8 @@ class _SignupScreenState extends State<SignupScreen> {
                     prefixIcon: Icon(Icons.lock_outline),
                   ),
                   obscureText: true,
-                  validator: (v) => v != _passwordCtrl.text
-                      ? 'Passwords do not match'
-                      : null,
+                  validator: (v) =>
+                      v != _passwordCtrl.text ? 'Passwords do not match' : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -303,7 +315,10 @@ class _SignupScreenState extends State<SignupScreen> {
                     elevation: 1,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
-                      side: const BorderSide(color: Colors.pinkAccent, width: 1),
+                      side: const BorderSide(
+                        color: Colors.pinkAccent,
+                        width: 1,
+                      ),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(12),
@@ -313,8 +328,10 @@ class _SignupScreenState extends State<SignupScreen> {
                           // Last period date
                           ListTile(
                             contentPadding: EdgeInsets.zero,
-                            leading: const Icon(Icons.calendar_today,
-                                color: Colors.pinkAccent),
+                            leading: const Icon(
+                              Icons.calendar_today,
+                              color: Colors.pinkAccent,
+                            ),
                             title: const Text('Last Period Start Date'),
                             subtitle: Text(
                               _lastPeriodDate == null
@@ -334,9 +351,15 @@ class _SignupScreenState extends State<SignupScreen> {
                           // Cycle length
                           Row(
                             children: [
-                              const Icon(Icons.loop, color: Colors.pinkAccent, size: 20),
+                              const Icon(
+                                Icons.loop,
+                                color: Colors.pinkAccent,
+                                size: 20,
+                              ),
                               const SizedBox(width: 8),
-                              const Expanded(child: Text('Average Cycle Length')),
+                              const Expanded(
+                                child: Text('Average Cycle Length'),
+                              ),
                               SizedBox(
                                 width: 64,
                                 child: TextFormField(
@@ -347,7 +370,9 @@ class _SignupScreenState extends State<SignupScreen> {
                                     suffixText: 'days',
                                     border: OutlineInputBorder(),
                                     contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 8),
+                                      horizontal: 8,
+                                      vertical: 8,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -357,10 +382,15 @@ class _SignupScreenState extends State<SignupScreen> {
                           // Period duration
                           Row(
                             children: [
-                              const Icon(Icons.water_drop,
-                                  color: Colors.pinkAccent, size: 20),
+                              const Icon(
+                                Icons.water_drop,
+                                color: Colors.pinkAccent,
+                                size: 20,
+                              ),
                               const SizedBox(width: 8),
-                              const Expanded(child: Text('Average Period Duration')),
+                              const Expanded(
+                                child: Text('Average Period Duration'),
+                              ),
                               SizedBox(
                                 width: 64,
                                 child: TextFormField(
@@ -371,7 +401,9 @@ class _SignupScreenState extends State<SignupScreen> {
                                     suffixText: 'days',
                                     border: OutlineInputBorder(),
                                     contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 8),
+                                      horizontal: 8,
+                                      vertical: 8,
+                                    ),
                                   ),
                                 ),
                               ),

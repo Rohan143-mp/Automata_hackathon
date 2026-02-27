@@ -7,9 +7,9 @@ class ApiService {
   /// Ordered list of backend URLs to try.
   /// The first one that responds wins and is used for the rest of the session.
   static const List<String> _candidates = [
-    'http://10.115.118.52:3000',        // PC LAN IP (same Wi-Fi)
-    'http://192.168.137.1:3000',        // PC hotspot IP
-    'http://10.0.2.2:3000',             // Android emulator loopback
+    'http://10.115.118.52:3000', // PC LAN IP (same Wi-Fi)
+    'http://192.168.137.1:3000', // PC hotspot IP
+    'http://10.0.2.2:3000', // Android emulator loopback
     'https://tknz9w00-3000.inc1.devtunnels.ms', // Dev tunnel (fallback)
   ];
 
@@ -40,7 +40,7 @@ class ApiService {
   static String? currentDoctorId;
   static String? currentDoctorName;
   static String? currentUserId; // Keep track of the logged-in user
-  static String? currentPatientName; // Display name of logged-in patient
+  static String? currentStudentName; // Display name of logged-in student
   static const String defaultUserId = '1';
 
   // Health profile — set during signup, persists for the session
@@ -169,7 +169,7 @@ class ApiService {
           }
           final RegExp nameRegExp = RegExp(r'"name":"([^"]+)"');
           final nameMatch = nameRegExp.firstMatch(bodyStr);
-          currentPatientName = nameMatch?.group(1) ?? username;
+          currentStudentName = nameMatch?.group(1) ?? username;
           return true;
         }
       }
@@ -200,7 +200,7 @@ class ApiService {
           } else {
             currentUserId = defaultUserId;
           }
-          currentPatientName = name;
+          currentStudentName = name;
           return true;
         }
       }

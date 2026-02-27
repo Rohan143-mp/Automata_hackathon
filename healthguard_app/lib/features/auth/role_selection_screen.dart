@@ -125,7 +125,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                   minimumSize: Size(size.width * 0.8, 56),
                   textStyle: TextStyle(fontSize: isSmallScreen ? 16 : 18),
                 ),
-                child: const Text('Continue as Patient'),
+                child: const Text('Continue as Student'),
               ),
               const SizedBox(height: 24),
               OutlinedButton(

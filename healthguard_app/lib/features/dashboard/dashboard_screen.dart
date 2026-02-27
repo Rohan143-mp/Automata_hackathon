@@ -52,7 +52,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
         cats.contains('disability');
   }
 
-  String get _patientName => ApiService.currentPatientName ?? '';
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return 'Good morning';
+    } else if (hour < 17) {
+      return 'Good afternoon';
+    } else {
+      return 'Good evening';
+    }
+  }
+
+  String get _studentName => ApiService.currentStudentName ?? 'Student';
+
+  String get _studentGreeting {
+    final greeting = _getGreeting();
+    return '$greeting, $_studentName';
+  }
 
   @override
   void initState() {
@@ -95,7 +111,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       patientId: ApiService.currentUserId ?? '1',
       emergencyContact: _emergencyContact,
       doctorContact: _doctorContact,
-      patientName: _patientName,
+      patientName: _studentName,
     );
 
     if (!mounted) return;
@@ -543,7 +559,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      drawer: _buildDrawer(context),
+      // drawer: _buildDrawer(context),
       body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: _currentIndex,
@@ -565,7 +581,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             if (_isLoading) const LinearProgressIndicator(),
             Text(
-              'Goodmorning',
+              _studentGreeting,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: isSmallScreen ? 22 : 26,
@@ -694,151 +710,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             SizedBox(height: size.height * 0.04),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildDrawer(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                const Icon(Icons.account_circle, color: Colors.white, size: 40),
-                const SizedBox(height: 8),
-                Text(
-                  ApiService.currentPatientName ?? '',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: size.width < 360 ? 18 : 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  'ID: ${ApiService.currentUserId ?? '-'}',
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
-                ),
-              ],
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.edit),
-            title: const Text('Edit Profile'),
-            onTap: () {
-              // TODO: Edit profile screen
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Edit Profile coming soon')),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.description),
-            title: const Text('View Prescriptions'),
-            onTap: () {
-              // TODO: Prescriptions screen
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Prescriptions coming soon')),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.help_outline),
-            title: const Text('Help & Support'),
-            onTap: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Help coming soon')));
-            },
-          ),
-          const Divider(),
-          // ── Demo / Testing ────────────────────────────────────────
-          ListTile(
-            leading: const Icon(Icons.science, color: Colors.red),
-            title: const Text(
-              'Emergency Vitals Simulator',
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
-            ),
-            subtitle: const Text('Set mock HR / BP / Glucose → trigger alert'),
-            onTap: () {
-              Navigator.pop(context);
-              _showVitalsSimulator();
-            },
-          ),
-          ListTile(
-            leading: Icon(
-              Icons.accessibility_new,
-              color: _isSpecialNeeds ? Colors.amber : Colors.grey,
-            ),
-            title: Text(
-              _isSpecialNeeds
-                  ? 'Special Needs Mode: ON'
-                  : 'Special Needs Mode: OFF',
-              style: TextStyle(
-                color: _isSpecialNeeds ? Colors.amber.shade800 : Colors.grey,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            subtitle: Text(
-              ApiService.healthCategories.any(
-                    (c) => [
-                      'autism',
-                      'epilepsy',
-                      'elderly',
-                      'disability',
-                    ].contains(c),
-                  )
-                  ? 'Auto-enabled from your health profile'
-                  : 'Tap app-bar icon to toggle manually',
-            ),
-            onTap: () {
-              Navigator.pop(context);
-              final cats = ApiService.healthCategories;
-              final autoEnabled = cats.any(
-                (c) =>
-                    ['autism', 'epilepsy', 'elderly', 'disability'].contains(c),
-              );
-              setState(() => _specialNeedsOverride = !_specialNeedsOverride);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    _isSpecialNeeds
-                        ? '🟡 Special Needs Mode: ON'
-                              '${autoEnabled ? ' (profile)' : ' (manual)'}'
-                        : '⚪ Special Needs Mode: OFF',
-                  ),
-                ),
-              );
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text(
-              'Logout',
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
-            ),
-            onTap: () {
-              Navigator.pop(context); // close drawer
-              ApiService.currentUserId = null;
-              ApiService.currentPatientName = null;
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                AppConstants.roleSelectionRoute,
-                (route) => false,
-              );
-            },
-          ),
-        ],
       ),
     );
   }
