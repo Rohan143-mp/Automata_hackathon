@@ -1,0 +1,13 @@
+mcp_config.json
+node_modules/
+__pycache__/
+*.pyc
+.env
+*.db
+build/
+.gsd/
+.gemini/
+.agent/
+.dart_tool/
+.pub-cache/
+.pub/
