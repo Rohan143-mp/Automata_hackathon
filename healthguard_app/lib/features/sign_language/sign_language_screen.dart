@@ -20,7 +20,7 @@ class _SignLanguageScreenState extends State<SignLanguageScreen>
 
   static const List<Map<String, String>> _mockGestures = [
     {
-      'intent': 'I tried when meeting raj',
+      'intent': 'i tired when meeting raj',
       'speech': 'I am tired when are we meeting raj?',
     },
   ];

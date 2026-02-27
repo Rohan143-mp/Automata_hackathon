@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../services/ollama_service.dart';
 
@@ -17,6 +18,9 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
   bool _isLoading = false;
   bool _isConnected = false;
   bool _isCheckingConnection = true;
+
+  /// Periodic timer that keeps retrying while offline.
+  Timer? _retryTimer;
 
   @override
   void initState() {
@@ -38,7 +42,36 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
         _isConnected = connected;
         _isCheckingConnection = false;
       });
+      // Start or stop the auto-retry timer based on connection state.
+      if (connected) {
+        _retryTimer?.cancel();
+        _retryTimer = null;
+      } else {
+        _startRetryTimer();
+      }
     }
+  }
+
+  /// Retry every 8 seconds while offline — stops once connected.
+  void _startRetryTimer() {
+    if (_retryTimer != null && _retryTimer!.isActive) return;
+    _retryTimer = Timer.periodic(const Duration(seconds: 8), (_) async {
+      if (!mounted) {
+        _retryTimer?.cancel();
+        return;
+      }
+      final connected = await _ollama.checkConnection();
+      if (mounted) {
+        setState(() {
+          _isConnected = connected;
+          _isCheckingConnection = false;
+        });
+        if (connected) {
+          _retryTimer?.cancel();
+          _retryTimer = null;
+        }
+      }
+    });
   }
 
   void _addBotMessage(String text) {
@@ -63,7 +96,8 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
 
     if (mounted) {
       // Strip <think>...</think> tags from deepseek-r1 reasoning
-      final cleaned = reply.replaceAll(RegExp(r'<think>[\s\S]*?</think>'), '').trim();
+      final cleaned =
+          reply.replaceAll(RegExp(r'<think>[\s\S]*?</think>'), '').trim();
       _addBotMessage(cleaned.isNotEmpty ? cleaned : reply);
       setState(() => _isLoading = false);
     }
@@ -233,37 +267,63 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
       );
     }
 
+    if (_isConnected) {
+      return GestureDetector(
+        onTap: _checkConnection,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+          color: Colors.green.shade50,
+          child: Row(
+            children: [
+              Icon(Icons.check_circle, size: 16, color: Colors.green.shade700),
+              const SizedBox(width: 8),
+              Text(
+                'Ollama connected • ${OllamaService.modelName}',
+                style: TextStyle(fontSize: 13, color: Colors.green.shade800),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // ── Offline — show error detail + auto-retry notice ──
     return GestureDetector(
       onTap: _checkConnection,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
-        color: _isConnected ? Colors.green.shade50 : Colors.red.shade50,
-        child: Row(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        color: Colors.red.shade50,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              _isConnected ? Icons.check_circle : Icons.error_outline,
-              size: 16,
-              color: _isConnected
-                  ? Colors.green.shade700
-                  : Colors.red.shade700,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                _isConnected
-                    ? 'Ollama connected • ${OllamaService.modelName}'
-                    : 'Ollama offline — tap to retry',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: _isConnected
-                      ? Colors.green.shade800
-                      : Colors.red.shade800,
+            Row(
+              children: [
+                Icon(Icons.error_outline, size: 16, color: Colors.red.shade700),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Ollama offline — retrying automatically…',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.red.shade800,
+                    ),
+                  ),
                 ),
-              ),
+                Icon(Icons.refresh, size: 16, color: Colors.red.shade600),
+              ],
             ),
-            if (!_isConnected)
-              Icon(Icons.refresh, size: 16, color: Colors.red.shade600),
+            if (_ollama.lastError != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                _ollama.lastError!,
+                style: TextStyle(fontSize: 11, color: Colors.red.shade600),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ],
         ),
       ),
@@ -272,6 +332,7 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
 
   @override
   void dispose() {
+    _retryTimer?.cancel();
     _controller.dispose();
     _scrollController.dispose();
     super.dispose();

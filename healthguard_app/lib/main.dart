@@ -9,8 +9,11 @@ import 'features/auth/doctor_signup_screen.dart';
 import 'features/dashboard/doctor_dashboard_screen.dart';
 import 'features/dashboard/doctor_patient_vitals_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile/services/api_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await ApiService.resolveBackend();
   runApp(const MyApp());
 }
 

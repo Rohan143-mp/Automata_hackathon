@@ -4,8 +4,38 @@ import 'package:mobile/models/user_vitals.dart';
 import 'package:mobile/models/risk_result.dart';
 
 class ApiService {
-  // 10.0.2.2 = Android emulator; 10.150.48.138 = PC Wi-Fi IP for physical device
-  static const String baseUrl = 'https://tknz9w00-3000.inc1.devtunnels.ms';
+  /// Ordered list of backend URLs to try.
+  /// The first one that responds wins and is used for the rest of the session.
+  static const List<String> _candidates = [
+    'http://10.115.118.52:3000',        // PC LAN IP (same Wi-Fi)
+    'http://192.168.137.1:3000',        // PC hotspot IP
+    'http://10.0.2.2:3000',             // Android emulator loopback
+    'https://tknz9w00-3000.inc1.devtunnels.ms', // Dev tunnel (fallback)
+  ];
+
+  /// Active backend URL — resolved once by [resolveBackend].
+  static String baseUrl = _candidates.last; // default to tunnel until resolved
+
+  /// Call once at app startup (e.g. in main.dart or splash screen).
+  /// Tries each candidate and locks onto the first one that responds.
+  static Future<void> resolveBackend() async {
+    for (final url in _candidates) {
+      try {
+        final response = await http
+            .get(Uri.parse('$url/'))
+            .timeout(const Duration(seconds: 3));
+        if (response.statusCode == 200) {
+          baseUrl = url;
+          print('[ApiService] Backend resolved → $url');
+          return;
+        }
+      } catch (_) {
+        // try next candidate
+      }
+    }
+    print('[ApiService] No backend found, keeping default: $baseUrl');
+  }
+
   // Doctor session info
   static String? currentDoctorId;
   static String? currentDoctorName;

@@ -7,6 +7,7 @@ import '../vitals/vitals_screen.dart';
 import '../profile/profile_screen.dart';
 import '../chat_assistant/chat_screen.dart';
 import '../sign_language/sign_language_screen.dart';
+import '../offline_ai/offline_ai_screen.dart';
 
 import '../../services/health_service.dart';
 import '../../services/spike_alert_service.dart';
@@ -449,6 +450,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _buildDashboardHome(),
     const VitalsScreen(),
     const SignLanguageScreen(),
+    const OfflineAiScreen(),
     const ProfileScreen(),
   ];
 
@@ -863,6 +865,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 2:
         return 'Sign Language';
       case 3:
+        return 'Offline AI';
+      case 4:
         return 'Profile';
       default:
         return AppConstants.appName;

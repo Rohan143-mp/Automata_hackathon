@@ -25,6 +25,10 @@ class CustomBottomNavBar extends StatelessWidget {
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
         BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'Vitals'),
         BottomNavigationBarItem(icon: Icon(Icons.sign_language), label: 'Sign'),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.psychology),
+          label: 'Offline AI',
+        ),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
       ],
     );
