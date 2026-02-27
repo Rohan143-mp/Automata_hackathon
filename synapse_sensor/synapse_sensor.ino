@@ -4,7 +4,6 @@
 MPU6050 mpu;
 
 // Flex Sensor Pins (Arduino Uno: A0-A3 available, A4/A5 used by I2C)
-// NOTE: Thumb flex sensor is wired to ESP8266 A0 (Uno has no free analog pins)
 const int FLEX_INDEX_PIN  = A0; // Index
 const int FLEX_MIDDLE_PIN = A1; // Middle
 const int FLEX_RING_PIN   = A2; // Ring
@@ -32,7 +31,7 @@ void loop() {
   if (currentTime - lastTime >= UPDATE_INTERVAL) {
     lastTime = currentTime;
 
-    // Read Flex Sensors (4 fingers — Thumb is on ESP8266)
+    // Read Flex Sensors (4 fingers)
     int fIndex  = analogRead(FLEX_INDEX_PIN);
     int fMiddle = analogRead(FLEX_MIDDLE_PIN);
     int fRing   = analogRead(FLEX_RING_PIN);
@@ -47,7 +46,6 @@ void loop() {
     float gyroY = gy / 131.0;
 
     // Format output as CSV: <Index,Middle,Ring,Pinky,GX,GY>
-    // ESP8266 will prepend Thumb (F1) before broadcasting
     Serial.print("<");
     Serial.print(fIndex);  Serial.print(",");
     Serial.print(fMiddle); Serial.print(",");

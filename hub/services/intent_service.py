@@ -5,7 +5,7 @@ import os
 OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 OLLAMA_URL = f"{OLLAMA_HOST}/api/generate"
 # Assuming 'llama3' or 'phi3' is running locally
-MODEL_NAME = "llama3"
+MODEL_NAME = "deepseek-r1:8b"
 
 def generate_fluent_speech(gesture_intent, recent_transcript):
     """

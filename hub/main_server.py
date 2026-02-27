@@ -41,10 +41,10 @@ async def ingest_glove_data():
                         data_str = msg[1:-1]
                         parts = data_str.split(',')
                         
-                        if len(parts) == 7:
+                        if len(parts) == 6:
                             try:
-                                # Parse out 7D vector (5 fingers + 2 gyro)
-                                vector = [float(p) for p in parts[:7]]
+                                # Parse out 6D vector (4 fingers + 2 gyro)
+                                vector = [float(p) for p in parts[:6]]
                                 
                                 current_time = time.time()
                                 

@@ -2,8 +2,8 @@
 #include <WebSocketsServer.h>
 
 // Networking Configuration
-const char* WIFI_SSID = "Synapse_Network";
-const char* WIFI_PASSWORD = "password123";
+const char* WIFI_SSID = "infinix";
+const char* WIFI_PASSWORD = "Rohan2233";
 
 // WebSocket Server on Port 81
 WebSocketsServer webSocket(81);

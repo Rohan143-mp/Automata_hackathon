@@ -1,6 +1,6 @@
-/// AI configuration for HealthGuard — powered by Google Gemini.
+/// AI configuration for signify — powered by Google Gemini.
 class AiConfig {
-  static const String geminiApiKey = String.fromEnvironment('GEMINI_API_KEY');
+  static const String geminiApiKey = 'AIzaSyCuGnmdW_7jU8rJjIqo-TZYSPwAR2yL7es';
   static const String model = 'gemini-1.5-flash';
 
   static String get baseUrl =>

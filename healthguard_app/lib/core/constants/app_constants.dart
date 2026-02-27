@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppConstants {
-  static const String appName = 'CAVISTA Health Companion';
+  static const String appName = 'signify';
   static const Color primaryColor = Colors.teal;
   static const Color accentColor = Colors.tealAccent;
 

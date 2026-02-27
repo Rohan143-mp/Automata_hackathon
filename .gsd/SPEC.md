@@ -1,4 +1,4 @@
-# SYNAPSE — The Bio-Digital Larynx
+# Inclusive Learning Platform for Specially-Abled Students (SYNAPSE)
 
 > Full-Duplex Communication Suit for Deaf-Mute Students
 > Hackathon Track: ET-4 — Inclusive Learning Platform for Specially-Abled Students

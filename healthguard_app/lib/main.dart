@@ -1,9 +1,9 @@
 import 'package:mobile/core/constants/app_constants.dart';
+import 'package:mobile/core/theme/app_theme.dart';
 import 'package:mobile/features/auth/login_screen.dart';
 import 'package:mobile/features/auth/role_selection_screen.dart';
 import 'package:mobile/features/auth/signup_screen.dart';
 import 'package:mobile/features/dashboard/dashboard_screen.dart';
-import 'package:mobile/features/classroom/classroom_screen.dart';
 import 'features/auth/doctor_login_screen.dart';
 import 'features/auth/doctor_signup_screen.dart';
 import 'features/dashboard/doctor_dashboard_screen.dart';
@@ -20,15 +20,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'SYNAPSE',
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        primaryColor: const Color(0xFF2D004D),
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF2D004D),
-          secondary: Color(0xFF00E5FF),
-        ),
-      ),
+      title: 'signify',
+      theme: AppTheme.lightTheme,
       initialRoute: AppConstants.dashboardRoute,
       routes: {
         AppConstants.roleSelectionRoute: (context) =>
@@ -41,7 +34,6 @@ class MyApp extends StatelessWidget {
         '/doctor_patient_vitals': (context) =>
             const DoctorPatientVitalsScreen(),
         AppConstants.dashboardRoute: (context) => const DashboardScreen(),
-        '/classroom': (context) => const ClassroomScreen(),
       },
     );
   }

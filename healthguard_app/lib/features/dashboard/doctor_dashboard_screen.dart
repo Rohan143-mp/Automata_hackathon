@@ -90,7 +90,9 @@ class DoctorProfileTab extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.3),
                       blurRadius: 15,
                       offset: const Offset(0, 8),
                     ),
@@ -126,7 +128,10 @@ class DoctorProfileTab extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(20),
@@ -134,7 +139,11 @@ class DoctorProfileTab extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.phone, size: 14, color: Colors.white),
+                          const Icon(
+                            Icons.phone,
+                            size: 14,
+                            color: Colors.white,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             doctorInfo['mobile'] ?? '-',
@@ -147,7 +156,7 @@ class DoctorProfileTab extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 30),
-              
+
               // Statistics Row
               Row(
                 children: [
@@ -176,7 +185,9 @@ class DoctorProfileTab extends StatelessWidget {
 
               // Quick Actions or Additional Info
               Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 elevation: 2,
                 child: Padding(
                   padding: const EdgeInsets.all(20),
@@ -185,14 +196,29 @@ class DoctorProfileTab extends StatelessWidget {
                     children: [
                       const Text(
                         'Practice Details',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 16),
-                      _buildDetailRow(Icons.location_on_outlined, 'Clinic Location', 'HealthGuard Medical Center'),
+                      _buildDetailRow(
+                        Icons.location_on_outlined,
+                        'Clinic Location',
+                        'signify Medical Center',
+                      ),
                       const Divider(height: 24),
-                      _buildDetailRow(Icons.access_time, 'Available Hours', '09:00 AM - 05:00 PM'),
+                      _buildDetailRow(
+                        Icons.access_time,
+                        'Available Hours',
+                        '09:00 AM - 05:00 PM',
+                      ),
                       const Divider(height: 24),
-                      _buildDetailRow(Icons.verified_user_outlined, 'Doctor ID', '#${ApiService.currentDoctorId}'),
+                      _buildDetailRow(
+                        Icons.verified_user_outlined,
+                        'Doctor ID',
+                        '#${ApiService.currentDoctorId}',
+                      ),
                     ],
                   ),
                 ),
@@ -204,7 +230,13 @@ class DoctorProfileTab extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(BuildContext context, String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    BuildContext context,
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -232,18 +264,12 @@ class DoctorProfileTab extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
             title,
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
           ),
         ],
       ),
@@ -258,8 +284,14 @@ class DoctorProfileTab extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-            Text(value, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            ),
           ],
         ),
       ],
@@ -327,8 +359,11 @@ class _DoctorAppointmentsTabState extends State<DoctorAppointmentsTab> {
                 itemBuilder: (context, idx) {
                   final appt = appointments[idx];
                   final dynamic confirmedData = appt['confirmed'];
-                  final bool confirmed = confirmedData == true || confirmedData == 1 || confirmedData == 'true';
-                  
+                  final bool confirmed =
+                      confirmedData == true ||
+                      confirmedData == 1 ||
+                      confirmedData == 'true';
+
                   return Card(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -425,9 +460,9 @@ class _DoctorPatientsTabState extends State<DoctorPatientsTab> {
             children: [
               Text(
                 'My Patients',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               Row(
                 children: [
@@ -438,8 +473,12 @@ class _DoctorPatientsTabState extends State<DoctorPatientsTab> {
                     selectedColor: Colors.red.shade100,
                     checkmarkColor: Colors.red,
                     labelStyle: TextStyle(
-                      color: _sortByPriority ? Colors.red : Colors.grey.shade700,
-                      fontWeight: _sortByPriority ? FontWeight.bold : FontWeight.normal,
+                      color: _sortByPriority
+                          ? Colors.red
+                          : Colors.grey.shade700,
+                      fontWeight: _sortByPriority
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -467,8 +506,10 @@ class _DoctorPatientsTabState extends State<DoctorPatientsTab> {
 
               if (_sortByPriority) {
                 patients.sort((a, b) {
-                  final int pA = int.tryParse(a['priority']?.toString() ?? '0') ?? 0;
-                  final int pB = int.tryParse(b['priority']?.toString() ?? '0') ?? 0;
+                  final int pA =
+                      int.tryParse(a['priority']?.toString() ?? '0') ?? 0;
+                  final int pB =
+                      int.tryParse(b['priority']?.toString() ?? '0') ?? 0;
                   return pB.compareTo(pA); // High priority first
                 });
               }
@@ -478,8 +519,9 @@ class _DoctorPatientsTabState extends State<DoctorPatientsTab> {
                 itemCount: patients.length,
                 itemBuilder: (context, idx) {
                   final patient = patients[idx];
-                  final int priorityLevel = int.tryParse(patient['priority']?.toString() ?? '0') ?? 0;
-                  
+                  final int priorityLevel =
+                      int.tryParse(patient['priority']?.toString() ?? '0') ?? 0;
+
                   return Card(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -493,8 +535,13 @@ class _DoctorPatientsTabState extends State<DoctorPatientsTab> {
                       contentPadding: const EdgeInsets.all(12),
                       leading: CircleAvatar(
                         radius: 24,
-                        backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                        child: Icon(Icons.person, color: Theme.of(context).colorScheme.primary),
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.primary.withOpacity(0.1),
+                        child: Icon(
+                          Icons.person,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                       title: Text(
                         patient['name'] ?? patient['patient_id'] ?? '-',
@@ -507,11 +554,18 @@ class _DoctorPatientsTabState extends State<DoctorPatientsTab> {
                           const SizedBox(height: 4),
                           if (priorityLevel > 0)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
-                                color: _getPriorityColor(priorityLevel).withOpacity(0.1),
+                                color: _getPriorityColor(
+                                  priorityLevel,
+                                ).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: _getPriorityColor(priorityLevel)),
+                                border: Border.all(
+                                  color: _getPriorityColor(priorityLevel),
+                                ),
                               ),
                               child: Text(
                                 'Priority: $priorityLevel',

@@ -29,11 +29,26 @@ class SpikeAlertService {
           perm = await Geolocator.requestPermission();
         }
         if (perm != LocationPermission.deniedForever) {
-          final pos = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high,
-          );
-          lat = pos.latitude;
-          lng = pos.longitude;
+          // Try last known first for instant retrieval
+          Position? pos = await Geolocator.getLastKnownPosition();
+
+          if (pos == null) {
+            // If none exists, try a quick fetch with a strict 3-second timeout
+            // so we don't delay the emergency SMS
+            try {
+              pos = await Geolocator.getCurrentPosition(
+                desiredAccuracy: LocationAccuracy.medium,
+                timeLimit: const Duration(seconds: 3),
+              );
+            } catch (e) {
+              pos = null;
+            }
+          }
+
+          if (pos != null) {
+            lat = pos.latitude;
+            lng = pos.longitude;
+          }
         }
       }
     } catch (_) {}
@@ -81,7 +96,9 @@ class SpikeAlertService {
       await launchUrl(fallback, mode: LaunchMode.externalApplication);
     }
     // ignore: avoid_print
-    print('[SpikeAlert] SMS launch result for $number — smsto: ${await canLaunchUrl(uri)}, sms: ${await canLaunchUrl(fallback)}');
+    print(
+      '[SpikeAlert] SMS launch result for $number — smsto: ${await canLaunchUrl(uri)}, sms: ${await canLaunchUrl(fallback)}',
+    );
   }
 
   /// Reset so alert can be shown again next app session.

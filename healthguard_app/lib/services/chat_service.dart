@@ -60,10 +60,10 @@ class ChatService {
                 'parts': [
                   {
                     'text':
-                        'You are HealthGuard AI, a friendly and knowledgeable personal health assistant. '
-                            'You provide personalised, empathetic health guidance based on the user\'s real-time vitals. '
-                            'Keep responses concise (2–4 sentences). Always recommend consulting a doctor for medical decisions.\n\n'
-                            'Current patient vitals: ${_vitalsContext(vitals)}',
+                        'You are signify AI, a friendly and knowledgeable personal health assistant. '
+                        'You provide personalised, empathetic health guidance based on the user\'s real-time vitals. '
+                        'Keep responses concise (2–4 sentences). Always recommend consulting a doctor for medical decisions.\n\n'
+                        'Current patient vitals: ${_vitalsContext(vitals)}',
                   },
                 ],
               },
@@ -99,7 +99,9 @@ class ChatService {
       } else {
         _history.removeLast();
         // ignore: avoid_print
-        print('[ChatService] Non-200 response: ${response.statusCode}\n${response.body}');
+        print(
+          '[ChatService] Non-200 response: ${response.statusCode}\n${response.body}',
+        );
         return _offlineFallback(text, vitals);
       }
     } catch (e) {

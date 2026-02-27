@@ -5,10 +5,7 @@ import 'package:mobile/models/risk_result.dart';
 
 class ApiService {
   // 10.0.2.2 = Android emulator; 10.150.48.138 = PC Wi-Fi IP for physical device
-  static const String baseUrl = String.fromEnvironment(
-    'BACKEND_URL',
-    defaultValue: 'http://localhost:3000',
-  );
+  static const String baseUrl = 'https://tknz9w00-3000.inc1.devtunnels.ms';
   // Doctor session info
   static String? currentDoctorId;
   static String? currentDoctorName;
@@ -19,11 +16,24 @@ class ApiService {
   // Health profile — set during signup, persists for the session
   static String? currentGender; // 'Male', 'Female', 'Other'
   static List<String> healthCategories = [];
-  static String emergencyContact = ''; // phone number for spike SMS alerts
+  static String emergencyContact =
+      '+917744039115'; // phone number for spike SMS alerts
   // Menstrual cycle (populated when gender is Female)
   static DateTime? lastPeriodDate;
   static int menstrualCycleLength = 28; // days
   static int menstrualPeriodDuration = 5; // days
+
+  /// Check if backend is reachable
+  Future<bool> checkConnection() async {
+    try {
+      final uri = Uri.parse(baseUrl);
+      await http.get(uri).timeout(const Duration(seconds: 3));
+      // As long as we receive any response without timing out or socket error, it's connected.
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 
   /// Sync vitals to the backend. Returns true on success.
   Future<bool> syncVitals(UserVitals vitals, {String? userId}) async {
