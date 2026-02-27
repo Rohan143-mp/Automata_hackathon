@@ -12,7 +12,7 @@ class SignLanguageScreen extends StatefulWidget {
 class _SignLanguageScreenState extends State<SignLanguageScreen>
     with SingleTickerProviderStateMixin {
   // ── Mock mode ──────────────────────────────────────────────────────────
-  final bool _isMockMode = true; // start in mock mode by default
+  final bool _isMockMode = false; // start in mock mode by default
   Timer? _mockFlexTimer;
   Timer? _mockGestureTimer;
   final Random _rng = Random();

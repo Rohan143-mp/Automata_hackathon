@@ -52,7 +52,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         cats.contains('disability');
   }
 
-  String get _patientName => ApiService.currentPatientName ?? 'Patient';
+  String get _patientName => ApiService.currentPatientName ?? '';
 
   @override
   void initState() {
@@ -565,7 +565,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             if (_isLoading) const LinearProgressIndicator(),
             Text(
-              'GM',
+              'Goodmorning',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: isSmallScreen ? 22 : 26,
@@ -715,7 +715,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const Icon(Icons.account_circle, color: Colors.white, size: 40),
                 const SizedBox(height: 8),
                 Text(
-                  ApiService.currentPatientName ?? 'Patient',
+                  ApiService.currentPatientName ?? '',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: size.width < 360 ? 18 : 20,
