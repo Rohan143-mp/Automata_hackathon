@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 import 'package:vibration/vibration.dart';
 import '../../../widgets/bottom_nav_bar.dart';
 import '../../core/constants/app_constants.dart';
@@ -52,21 +53,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
         cats.contains('disability');
   }
 
-  String _getGreeting() {
+  String _getGreeting(AppLocalizations l) {
     final hour = DateTime.now().hour;
     if (hour < 12) {
-      return 'Good morning';
+      return l.goodMorning;
     } else if (hour < 17) {
-      return 'Good afternoon';
+      return l.goodAfternoon;
     } else {
-      return 'Good evening';
+      return l.goodEvening;
     }
   }
 
-  String get _studentName => ApiService.currentStudentName ?? 'Student';
+  String get _studentName =>
+      ApiService.currentStudentName ??
+      AppLocalizations.of(context)?.student ??
+      'Student';
 
-  String get _studentGreeting {
-    final greeting = _getGreeting();
+  String _studentGreeting(AppLocalizations l) {
+    final greeting = _getGreeting(l);
     return '$greeting, $_studentName';
   }
 
@@ -114,6 +118,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       patientName: _studentName,
     );
 
+    final l = AppLocalizations.of(context)!;
     if (!mounted) return;
     showDialog(
       context: context,
@@ -122,7 +127,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         backgroundColor: Colors.red.shade900,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          isMock ? '🚨 [TEST] Emergency Alert' : '🚨 Heart Rate Spike Detected',
+          isMock
+              ? '🚨 ${l.testEmergencyAlertTitle}'
+              : '🚨 ${l.heartRateSpikeDetected}',
           style: const TextStyle(
             color: Colors.white,
             fontSize: 21,
@@ -130,19 +137,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
         content: Text(
-          isMock
-              ? 'Mock heart rate: $hr BPM\n\n'
-                    'This is a test. In a real spike, emergency contacts are '
-                    'notified with your GPS location.'
-              : 'Heart rate: $hr BPM\n\n'
-                    'Emergency contacts and doctor have been notified with your GPS location.',
+          isMock ? l.mockHeartRateMsg(hr) : l.realSpikeMsg(hr),
           style: const TextStyle(color: Colors.white, fontSize: 15),
         ),
         actions: [
           TextButton(
-            child: const Text(
-              'DISMISS',
-              style: TextStyle(color: Colors.yellowAccent, fontSize: 18),
+            child: Text(
+              l.dismiss,
+              style: const TextStyle(color: Colors.yellowAccent, fontSize: 18),
             ),
             onPressed: () => Navigator.of(context).pop(),
           ),
@@ -162,6 +164,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final contactCtrl = TextEditingController(
       text: ApiService.emergencyContact,
     );
+
+    final l = AppLocalizations.of(context)!;
 
     showModalBottomSheet(
       context: context,
@@ -192,9 +196,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     children: [
                       Icon(Icons.science, color: Colors.red.shade700),
                       const SizedBox(width: 8),
-                      const Text(
-                        'Emergency Vitals Simulator',
-                        style: TextStyle(
+                      Text(
+                        l.emergencyVitalsSimulator,
+                        style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
                         ),
@@ -203,7 +207,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Slide values above threshold to unlock the trigger button.',
+                    l.slideValuesAbove,
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                   const Divider(height: 20),
@@ -212,7 +216,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   TextField(
                     controller: contactCtrl,
                     decoration: InputDecoration(
-                      labelText: 'Emergency Contact Number',
+                      labelText: l.emergencyContactNumber,
                       hintText: 'e.g. +919876543210',
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(
@@ -220,8 +224,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         color: Colors.red,
                       ),
                       helperText: ApiService.emergencyContact.isEmpty
-                          ? 'No number set at signup — enter one here'
-                          : 'From your profile (editable for this test)',
+                          ? l.noNumberSet
+                          : l.fromProfileEditable,
                       helperStyle: TextStyle(
                         color: ApiService.emergencyContact.isEmpty
                             ? Colors.red.shade700
@@ -234,7 +238,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                   // ── Heart Rate ──────────────────────────────────────────
                   _simulatorSlider(
-                    label: 'Heart Rate',
+                    label: l.heartRate,
                     value: mockHr.toDouble(),
                     unit: 'BPM',
                     min: 40,
@@ -242,11 +246,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     threshold: SpikeAlertService.spikeThreshold.toDouble(),
                     alert: hrAlert,
                     onChanged: (v) => setSheet(() => mockHr = v.round()),
+                    l: l,
                   ),
 
                   // ── Systolic BP ─────────────────────────────────────────
                   _simulatorSlider(
-                    label: 'Systolic Blood Pressure',
+                    label: l.systolicBp,
                     value: mockSystolic.toDouble(),
                     unit: 'mmHg',
                     min: 80,
@@ -254,11 +259,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     threshold: 140,
                     alert: bpAlert,
                     onChanged: (v) => setSheet(() => mockSystolic = v.round()),
+                    l: l,
                   ),
 
                   // ── Blood Glucose ───────────────────────────────────────
                   _simulatorSlider(
-                    label: 'Blood Glucose',
+                    label: l.bloodGlucose,
                     value: mockGlucose,
                     unit: 'mg/dL',
                     min: 70,
@@ -266,6 +272,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     threshold: 140,
                     alert: glucAlert,
                     onChanged: (v) => setSheet(() => mockGlucose = v),
+                    l: l,
                   ),
 
                   const SizedBox(height: 8),
@@ -273,7 +280,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   // ── Apply button ────────────────────────────────────────
                   OutlinedButton.icon(
                     icon: const Icon(Icons.dashboard_customize),
-                    label: const Text('Apply Mock Vitals to Dashboard'),
+                    label: Text(l.applyMockVitals),
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 44),
                     ),
@@ -309,8 +316,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     icon: const Icon(Icons.warning_amber_rounded),
                     label: Text(
                       anyAlert
-                          ? '🚨 Trigger Emergency Alert'
-                          : 'Raise a value above threshold first',
+                          ? '🚨 ${l.triggerEmergencyAlert}'
+                          : l.raiseValueAbove,
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: anyAlert
@@ -371,6 +378,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required double threshold,
     required bool alert,
     required ValueChanged<double> onChanged,
+    required AppLocalizations l,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -417,8 +425,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           padding: const EdgeInsets.only(left: 4, bottom: 10),
           child: Text(
             alert
-                ? '⚠️ Above ${threshold.round()} $unit — will trigger alert'
-                : 'Normal  |  Threshold: ${threshold.round()} $unit',
+                ? '⚠️ ${l.aboveThreshold(threshold.round().toString(), unit)}'
+                : l.normalThreshold(threshold.round().toString(), unit),
             style: TextStyle(
               fontSize: 11,
               color: alert ? Colors.red.shade700 : Colors.grey[600],
@@ -472,10 +480,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _getTitleForIndex(_currentIndex),
+          _getTitleForIndex(_currentIndex, l),
           style: TextStyle(fontSize: size.width < 360 ? 18 : 20),
         ),
         actions: [
@@ -494,16 +503,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     color: _isBackendConnected ? Colors.green : Colors.red,
                   ),
             tooltip: _isBackendConnected
-                ? 'Backend Connected'
-                : 'Backend Disconnected',
+                ? l.backendConnected
+                : l.backendDisconnected,
             onPressed: () {
               _checkBackendStatus();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
                     _isBackendConnected
-                        ? 'Backend Connected'
-                        : 'Backend Disconnected',
+                        ? l.backendConnected
+                        : l.backendDisconnected,
                   ),
                   duration: const Duration(seconds: 2),
                 ),
@@ -512,7 +521,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh Vitals',
+            tooltip: l.refreshVitals,
             onPressed: () {
               _fetchVitals();
               _checkBackendStatus();
@@ -524,8 +533,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               color: _isSpecialNeeds ? Colors.amber : null,
             ),
             tooltip: _isSpecialNeeds
-                ? 'Special Needs Mode: ON (tap to toggle)'
-                : 'Special Needs Mode: OFF (tap to toggle)',
+                ? l.specialNeedsModeOnTap
+                : l.specialNeedsModeOffTap,
             onPressed: () {
               // Categories from signup auto-enable this; override allows manual toggle
               final cats = ApiService.healthCategories;
@@ -539,9 +548,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 SnackBar(
                   content: Text(
                     _isSpecialNeeds
-                        ? '🟡 Special Needs Mode: ON — spike alerts enabled'
-                              '${autoEnabled ? ' (from profile categories)' : ' (manual)'}'
-                        : '⚪ Special Needs Mode: OFF',
+                        ? '🟡 ${l.specialNeedsOnAlerts}'
+                              '${autoEnabled ? ' ${l.specialNeedsFromProfile}' : ' ${l.specialNeedsManual}'}'
+                        : '⚪ ${l.specialNeedsModeOff}',
                   ),
                 ),
               );
@@ -550,11 +559,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Notifications (fake: No new alerts)'),
-                ),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(l.notificationsNone)));
             },
           ),
         ],
@@ -571,6 +578,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildDashboardHome() {
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
+    final l = AppLocalizations.of(context)!;
 
     return RefreshIndicator(
       onRefresh: _fetchVitals,
@@ -581,7 +589,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             if (_isLoading) const LinearProgressIndicator(),
             Text(
-              _studentGreeting,
+              _studentGreeting(l),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: isSmallScreen ? 22 : 26,
@@ -589,7 +597,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             SizedBox(height: isSmallScreen ? 4 : 6),
             Text(
-              'Your health snapshot • ${DateTime.now().toString().substring(0, 10)}',
+              '${l.healthSnapshot} • ${DateTime.now().toString().substring(0, 10)}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Colors.grey[600],
                 fontSize: isSmallScreen ? 14 : 16,
@@ -620,7 +628,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Test Emergency Alert',
+                            l.testEmergencyAlert,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
@@ -628,7 +636,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ),
                           Text(
-                            'Simulate HR / BP / Glucose to trigger SMS + buzz',
+                            l.simulateVitals,
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.red.shade600,
@@ -654,25 +662,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
               childAspectRatio: 1.05, // responsive tall cards
               children: [
                 _VitalCard(
-                  title: 'Heart Rate',
+                  title: l.heartRate,
                   value: _vitals?.latestHeartRate ?? 'N/A',
                   icon: Icons.favorite,
                   color: Colors.red,
                 ),
                 _VitalCard(
-                  title: 'BP',
+                  title: l.bp,
                   value: _vitals?.latestBloodPressure ?? 'N/A',
                   icon: Icons.speed,
                   color: Colors.blue,
                 ),
                 _VitalCard(
-                  title: 'Steps',
+                  title: l.steps,
                   value: _vitals != null ? '${_vitals!.todaySteps}' : 'N/A',
                   icon: Icons.directions_walk,
                   color: Colors.teal,
                 ),
                 _VitalCard(
-                  title: 'Calories',
+                  title: l.calories,
                   value: _vitals != null
                       ? _vitals!.todayCalories.toStringAsFixed(0)
                       : 'N/A',
@@ -680,7 +688,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   color: Colors.orange,
                 ),
                 _VitalCard(
-                  title: 'Active Min',
+                  title: l.activeMin,
                   value: _vitals != null
                       ? '${_vitals!.todayActiveMinutes}'
                       : 'N/A',
@@ -688,19 +696,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   color: Colors.green,
                 ),
                 _VitalCard(
-                  title: 'Glucose',
+                  title: l.glucose,
                   value: _vitals?.latestGlucose ?? 'N/A',
                   icon: Icons.bloodtype,
                   color: Colors.purple,
                 ),
                 _VitalCard(
-                  title: 'SpO2',
+                  title: l.spo2,
                   value: _vitals?.latestSpo2 ?? 'N/A',
                   icon: Icons.air,
                   color: Colors.cyan,
                 ),
                 _VitalCard(
-                  title: 'Stress',
+                  title: l.stress,
                   value: _vitals?.latestStress ?? 'N/A',
                   icon: Icons.psychology,
                   color: Colors.amber,
@@ -714,18 +722,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  String _getTitleForIndex(int index) {
+  String _getTitleForIndex(int index, AppLocalizations l) {
     switch (index) {
       case 0:
         return AppConstants.appName;
       case 1:
-        return 'Vitals';
+        return l.vitals;
       case 2:
-        return 'Sign Language';
+        return l.signLanguage;
       case 3:
-        return 'Offline AI';
+        return l.offlineAi;
       case 4:
-        return 'Profile';
+        return l.profile;
       default:
         return AppConstants.appName;
     }

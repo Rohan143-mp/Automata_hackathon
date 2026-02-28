@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 import '../../core/constants/app_constants.dart';
 import '../../services/api_service.dart';
 
@@ -19,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
+    final l = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: SafeArea(
@@ -38,18 +40,18 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: size.height * 0.06),
               TextField(
                 controller: _usernameController,
-                decoration: const InputDecoration(
-                  labelText: 'Username',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l.username,
+                  border: const OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.text,
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _passwordController,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l.password,
+                  border: const OutlineInputBorder(),
                 ),
                 obscureText: true,
               ),
@@ -73,8 +75,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         } else {
                           messenger.showSnackBar(
-                            const SnackBar(
-                              content: Text('Invalid credentials'),
+                            SnackBar(
+                              content: Text(l.invalidCredentials),
                             ),
                           );
                         }
@@ -84,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Login as Student'),
+                    : Text(l.loginAsStudent),
               ),
               const SizedBox(height: 16),
               TextButton(
@@ -94,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         context,
                         AppConstants.signupRoute,
                       ),
-                child: const Text('Don\'t have an account? Sign up'),
+                child: Text(l.dontHaveAccount),
               ),
               const SizedBox(height: 24),
               OutlinedButton(
@@ -121,8 +123,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         } else {
                           messenger.showSnackBar(
-                            const SnackBar(
-                              content: Text('Direct Sign In Failed'),
+                            SnackBar(
+                              content: Text(l.directSignInFailed),
                             ),
                           );
                         }
@@ -130,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 56),
                 ),
-                child: const Text('Quick Login (Direct Sign In)'),
+                child: Text(l.quickLogin),
               ),
             ],
           ),

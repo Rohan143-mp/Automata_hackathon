@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 import '../../services/health_service.dart';
 import '../../models/user_vitals.dart';
 
@@ -33,30 +34,35 @@ class _VitalsScreenState extends State<VitalsScreen> {
       endTime: now,
     );
 
-    setState(() {
-      _vitals = vitals;
-      _isLoading = false;
-      if (vitals == null) {
-        _status = 'Please authorize Health Connect and fetch data.';
-      }
-    });
+    if (mounted) {
+      final l = AppLocalizations.of(context)!;
+      setState(() {
+        _vitals = vitals;
+        _isLoading = false;
+        if (vitals == null) {
+          _status = l.authorizeHealthConnect;
+        }
+      });
+    }
   }
 
   Future<void> _writeMockData() async {
+    final l = AppLocalizations.of(context)!;
     setState(() {
       _isLoading = true;
-      _status = 'Writing mock data...';
+      _status = l.writingMockData;
     });
 
     final success = await _healthService.writeMockData();
 
-    setState(() {
-      _isLoading = false;
-      _status = success
-          ? 'Mock data injected successfully!'
-          : 'Failed to inject mock data.';
-    });
-    if (success) _fetchVitals();
+    if (mounted) {
+      final l2 = AppLocalizations.of(context)!;
+      setState(() {
+        _isLoading = false;
+        _status = success ? l2.mockDataInjected : l2.failedToInjectMock;
+      });
+      if (success) _fetchVitals();
+    }
   }
 
   Widget _buildVitalTile(
@@ -83,6 +89,7 @@ class _VitalsScreenState extends State<VitalsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -92,7 +99,7 @@ class _VitalsScreenState extends State<VitalsScreen> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   Text(
-                    'Daily Stats',
+                    l.dailyStats,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -100,85 +107,81 @@ class _VitalsScreenState extends State<VitalsScreen> {
                   const SizedBox(height: 16),
                   if (_vitals != null) ...[
                     _buildVitalTile(
-                      'Steps',
+                      l.steps,
                       '${_vitals!.todaySteps}',
                       Icons.directions_walk,
                       Colors.teal,
                     ),
                     _buildVitalTile(
-                      'Calories',
+                      l.calories,
                       '${_vitals!.todayCalories.toStringAsFixed(1)} kcal',
                       Icons.local_fire_department,
                       Colors.orange,
                     ),
                     _buildVitalTile(
-                      'Active Minutes',
+                      l.activeMinutes,
                       '${_vitals!.todayActiveMinutes} min',
                       Icons.timer,
                       Colors.green,
                     ),
                     const Divider(height: 32),
                     Text(
-                      'Latest Readings',
+                      l.latestReadings,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 16),
                     _buildVitalTile(
-                      'Heart Rate',
+                      l.heartRate,
                       _vitals!.latestHeartRate,
                       Icons.favorite,
                       Colors.red,
                     ),
                     _buildVitalTile(
-                      'Blood Pressure',
+                      l.bloodPressure,
                       _vitals!.latestBloodPressure,
                       Icons.speed,
                       Colors.blue,
                     ),
                     _buildVitalTile(
-                      'Glucose',
+                      l.glucose,
                       _vitals!.latestGlucose,
                       Icons.bloodtype,
                       Colors.purple,
                     ),
                     _buildVitalTile(
-                      'Sleep',
+                      l.sleep,
                       _vitals!.latestSleep,
                       Icons.nights_stay,
                       Colors.indigo,
                     ),
                     _buildVitalTile(
-                      'SpO2',
+                      l.spo2,
                       _vitals!.latestSpo2,
                       Icons.air,
                       Colors.cyan,
                     ),
                     _buildVitalTile(
-                      'Stress',
+                      l.stress,
                       _vitals!.latestStress,
                       Icons.psychology,
                       Colors.amber,
                     ),
                   ] else ...[
-                    const Center(
-                      child: Text(
-                        'No data found. Sync your watch or insert mock data.',
-                      ),
-                    ),
+                    Center(child: Text(l.noDataFound)),
                   ],
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     onPressed: _fetchVitals,
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Refresh Data'),
+                    label: Text(l.refreshData),
                   ),
                   const SizedBox(height: 8),
                   TextButton.icon(
                     onPressed: _writeMockData,
                     icon: const Icon(Icons.add),
-                    label: const Text('Insert Mock Data (Testing)'),
+                    label: Text(l.insertMockData),
                   ),
                   if (_status.isNotEmpty) ...[
                     const SizedBox(height: 16),

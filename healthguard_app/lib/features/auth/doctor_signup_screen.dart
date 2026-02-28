@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 import '../../services/api_service.dart';
 
 class DoctorSignupScreen extends StatefulWidget {
@@ -34,15 +35,16 @@ class _DoctorSignupScreenState extends State<DoctorSignupScreen> {
       Navigator.pushReplacementNamed(context, '/doctor_dashboard');
     } else {
       setState(() {
-        _error = 'Registration failed';
+        _error = AppLocalizations.of(context)!.registrationFailed;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Doctor Registration')),
+      appBar: AppBar(title: Text(l.doctorRegistration)),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -50,20 +52,20 @@ class _DoctorSignupScreenState extends State<DoctorSignupScreen> {
           children: [
             TextField(
               controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
+              decoration: InputDecoration(labelText: l.name),
             ),
             TextField(
               controller: _degreeController,
-              decoration: const InputDecoration(labelText: 'Degree'),
+              decoration: InputDecoration(labelText: l.degree),
             ),
             TextField(
               controller: _mobileController,
-              decoration: const InputDecoration(labelText: 'Mobile'),
+              decoration: InputDecoration(labelText: l.mobile),
               keyboardType: TextInputType.phone,
             ),
             TextField(
               controller: _pinController,
-              decoration: const InputDecoration(labelText: 'PIN'),
+              decoration: InputDecoration(labelText: l.pin),
               obscureText: true,
             ),
             const SizedBox(height: 24),
@@ -73,7 +75,7 @@ class _DoctorSignupScreenState extends State<DoctorSignupScreen> {
               onPressed: _loading ? null : _signup,
               child: _loading
                   ? const CircularProgressIndicator()
-                  : const Text('Register'),
+                  : Text(l.register),
             ),
           ],
         ),

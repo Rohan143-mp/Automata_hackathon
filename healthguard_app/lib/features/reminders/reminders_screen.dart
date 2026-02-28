@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class RemindersScreen extends StatelessWidget {
   const RemindersScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Text(
-        'Medication & Appointment Reminders\n(Coming soon)',
+        AppLocalizations.of(context)!.remindersComingSoon,
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 22),
+        style: const TextStyle(fontSize: 22),
       ),
     );
   }

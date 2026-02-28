@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 import 'package:mobile/services/api_service.dart';
 
 // ─────────────────────────────────────────────
@@ -6,26 +7,58 @@ import 'package:mobile/services/api_service.dart';
 // ─────────────────────────────────────────────
 class _HealthCategory {
   final String id;
-  final String label;
   final IconData icon;
-  const _HealthCategory(this.id, this.label, this.icon);
+  const _HealthCategory(this.id, this.icon);
 }
 
 const _kCategories = [
-  _HealthCategory('general', 'General Wellness', Icons.favorite),
-  _HealthCategory('pregnancy', 'Pregnancy', Icons.child_care),
-  _HealthCategory('epilepsy', 'Epilepsy / Seizures', Icons.electric_bolt),
-  _HealthCategory('autism', 'Autism Spectrum (ASD)', Icons.psychology),
-  _HealthCategory('diabetes1', 'Type 1 Diabetes', Icons.water_drop),
-  _HealthCategory('diabetes2', 'Type 2 Diabetes', Icons.monitor_heart),
-  _HealthCategory('hypertension', 'Hypertension (High BP)', Icons.speed),
-  _HealthCategory('heart', 'Heart Condition', Icons.favorite_border),
-  _HealthCategory('asthma', 'Asthma / Respiratory', Icons.air),
-  _HealthCategory('anxiety', 'Anxiety / Mental Health', Icons.self_improvement),
-  _HealthCategory('disability', 'Physical Disability', Icons.accessible),
-  _HealthCategory('surgery', 'Post-Surgery Recovery', Icons.healing),
-  _HealthCategory('elderly', 'Elderly / Senior Care', Icons.elderly),
+  _HealthCategory('general', Icons.favorite),
+  _HealthCategory('pregnancy', Icons.child_care),
+  _HealthCategory('epilepsy', Icons.electric_bolt),
+  _HealthCategory('autism', Icons.psychology),
+  _HealthCategory('diabetes1', Icons.water_drop),
+  _HealthCategory('diabetes2', Icons.monitor_heart),
+  _HealthCategory('hypertension', Icons.speed),
+  _HealthCategory('heart', Icons.favorite_border),
+  _HealthCategory('asthma', Icons.air),
+  _HealthCategory('anxiety', Icons.self_improvement),
+  _HealthCategory('disability', Icons.accessible),
+  _HealthCategory('surgery', Icons.healing),
+  _HealthCategory('elderly', Icons.elderly),
 ];
+
+String _categoryLabel(AppLocalizations l, String id) {
+  switch (id) {
+    case 'general':
+      return l.catGeneral;
+    case 'pregnancy':
+      return l.catPregnancy;
+    case 'epilepsy':
+      return l.catEpilepsy;
+    case 'autism':
+      return l.catAutism;
+    case 'diabetes1':
+      return l.catDiabetes1;
+    case 'diabetes2':
+      return l.catDiabetes2;
+    case 'hypertension':
+      return l.catHypertension;
+    case 'heart':
+      return l.catHeart;
+    case 'asthma':
+      return l.catAsthma;
+    case 'anxiety':
+      return l.catAnxiety;
+    case 'disability':
+      return l.catDisability;
+    case 'surgery':
+      return l.catSurgery;
+    case 'elderly':
+      return l.catElderly;
+    default:
+      return id;
+  }
+}
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -67,24 +100,24 @@ class _SignupScreenState extends State<SignupScreen> {
   bool get _isFemale => _gender == 'Female';
 
   Future<void> _pickLastPeriodDate() async {
+    final l = AppLocalizations.of(context)!;
     final picked = await showDatePicker(
       context: context,
       initialDate: _lastPeriodDate ?? DateTime.now(),
       firstDate: DateTime.now().subtract(const Duration(days: 90)),
       lastDate: DateTime.now(),
-      helpText: 'Select last period start date',
+      helpText: l.selectLastPeriodDate,
     );
     if (picked != null) setState(() => _lastPeriodDate = picked);
   }
 
   Future<void> _submit() async {
+    final l = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
     if (_isFemale && _lastPeriodDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select your last period start date.'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l.pleaseSelectLastPeriod)));
       return;
     }
 
@@ -112,19 +145,17 @@ class _SignupScreenState extends State<SignupScreen> {
 
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Account created! Please log in.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.accountCreated)));
         Navigator.pop(context); // back to login
       }
     } else {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Sign up failed. Username may already be taken.'),
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.signUpFailed)));
       }
     }
   }
@@ -143,8 +174,8 @@ class _SignupScreenState extends State<SignupScreen> {
     ),
   );
 
-  Widget _genderChip(String label, IconData icon) {
-    final selected = _gender == label;
+  Widget _genderChip(String value, String label, IconData icon) {
+    final selected = _gender == value;
     return ChoiceChip(
       avatar: Icon(
         icon,
@@ -155,11 +186,11 @@ class _SignupScreenState extends State<SignupScreen> {
       selected: selected,
       selectedColor: Colors.teal,
       labelStyle: TextStyle(color: selected ? Colors.white : Colors.black87),
-      onSelected: (_) => setState(() => _gender = label),
+      onSelected: (_) => setState(() => _gender = value),
     );
   }
 
-  Widget _categoryTile(_HealthCategory cat) {
+  Widget _categoryTile(_HealthCategory cat, AppLocalizations l) {
     final selected = _selectedCategories.contains(cat.id);
     return CheckboxListTile(
       value: selected,
@@ -181,7 +212,10 @@ class _SignupScreenState extends State<SignupScreen> {
           color: selected ? Colors.white : Colors.teal,
         ),
       ),
-      title: Text(cat.label, style: const TextStyle(fontSize: 14)),
+      title: Text(
+        _categoryLabel(l, cat.id),
+        style: const TextStyle(fontSize: 14),
+      ),
       controlAffinity: ListTileControlAffinity.trailing,
       dense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 4),
@@ -190,9 +224,10 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Account'),
+        title: Text(l.createAccount),
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
       ),
@@ -205,35 +240,33 @@ class _SignupScreenState extends State<SignupScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ── Section 1: Basic Info ──────────────────────────────────
-                _sectionHeader('Basic Information'),
+                _sectionHeader(l.basicInformation),
                 TextFormField(
                   controller: _nameCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Full Name',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person),
+                  decoration: InputDecoration(
+                    labelText: l.fullName,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.person),
                   ),
-                  validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Enter your name'
-                      : null,
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? l.enterYourName : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _usernameCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Username',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.alternate_email),
+                  decoration: InputDecoration(
+                    labelText: l.username,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.alternate_email),
                   ),
-                  validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Enter a username'
-                      : null,
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? l.enterUsername : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _passwordCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Password',
+                    labelText: l.password,
                     border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.lock),
                     suffixIcon: IconButton(
@@ -247,70 +280,70 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                   obscureText: _obscurePassword,
-                  validator: (v) => (v == null || v.length < 6)
-                      ? 'Password must be at least 6 characters'
-                      : null,
+                  validator: (v) =>
+                      (v == null || v.length < 6) ? l.passwordMinLength : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _confirmCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm Password',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock_outline),
+                  decoration: InputDecoration(
+                    labelText: l.confirmPassword,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.lock_outline),
                   ),
                   obscureText: true,
                   validator: (v) =>
-                      v != _passwordCtrl.text ? 'Passwords do not match' : null,
+                      v != _passwordCtrl.text ? l.passwordsDoNotMatch : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _emergencyCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Emergency Contact Number',
+                  decoration: InputDecoration(
+                    labelText: l.emergencyContactNumber,
                     hintText: 'e.g. +919876543210',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.emergency, color: Colors.red),
-                    helperText:
-                        'Receives SMS with your GPS location during a heart rate spike',
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.emergency, color: Colors.red),
+                    helperText: l.emergencyContactHelper,
                   ),
                   keyboardType: TextInputType.phone,
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) return null; // optional
                     final digits = v.trim().replaceAll(RegExp(r'[\s\-()]'), '');
                     if (!RegExp(r'^\+?\d{7,15}$').hasMatch(digits)) {
-                      return 'Enter a valid phone number (e.g. +919876543210)';
+                      return l.enterValidPhone;
                     }
                     return null;
                   },
                 ),
 
                 // ── Section 2: Gender ──────────────────────────────────────
-                _sectionHeader('Gender'),
+                _sectionHeader(l.gender),
                 Wrap(
                   spacing: 10,
                   children: [
-                    _genderChip('Male', Icons.male),
-                    _genderChip('Female', Icons.female),
-                    _genderChip('Other', Icons.transgender),
+                    _genderChip('Male', l.male, Icons.male),
+                    _genderChip('Female', l.female, Icons.female),
+                    _genderChip('Other', l.other, Icons.transgender),
                   ],
                 ),
 
                 // ── Section 3: Health Categories ───────────────────────────
-                _sectionHeader('Health Profile  (select all that apply)'),
+                _sectionHeader(l.healthProfileSelect),
                 Container(
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey.shade300),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
-                    children: _kCategories.map(_categoryTile).toList(),
+                    children: _kCategories
+                        .map((c) => _categoryTile(c, l))
+                        .toList(),
                   ),
                 ),
 
                 // ── Section 4: Menstrual Cycle (Female only) ───────────────
                 if (_isFemale) ...[
-                  _sectionHeader('Menstrual Cycle Tracking'),
+                  _sectionHeader(l.menstrualCycleTracking),
                   Card(
                     elevation: 1,
                     shape: RoundedRectangleBorder(
@@ -332,10 +365,10 @@ class _SignupScreenState extends State<SignupScreen> {
                               Icons.calendar_today,
                               color: Colors.pinkAccent,
                             ),
-                            title: const Text('Last Period Start Date'),
+                            title: Text(l.lastPeriodStartDate),
                             subtitle: Text(
                               _lastPeriodDate == null
-                                  ? 'Tap to select'
+                                  ? l.tapToSelect
                                   : '${_lastPeriodDate!.day}/${_lastPeriodDate!.month}/${_lastPeriodDate!.year}',
                               style: TextStyle(
                                 color: _lastPeriodDate == null
@@ -357,19 +390,17 @@ class _SignupScreenState extends State<SignupScreen> {
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
-                              const Expanded(
-                                child: Text('Average Cycle Length'),
-                              ),
+                              Expanded(child: Text(l.averageCycleLength)),
                               SizedBox(
                                 width: 64,
                                 child: TextFormField(
                                   controller: _cycleLenCtrl,
                                   keyboardType: TextInputType.number,
                                   textAlign: TextAlign.center,
-                                  decoration: const InputDecoration(
-                                    suffixText: 'days',
-                                    border: OutlineInputBorder(),
-                                    contentPadding: EdgeInsets.symmetric(
+                                  decoration: InputDecoration(
+                                    suffixText: l.days,
+                                    border: const OutlineInputBorder(),
+                                    contentPadding: const EdgeInsets.symmetric(
                                       horizontal: 8,
                                       vertical: 8,
                                     ),
@@ -388,19 +419,17 @@ class _SignupScreenState extends State<SignupScreen> {
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
-                              const Expanded(
-                                child: Text('Average Period Duration'),
-                              ),
+                              Expanded(child: Text(l.averagePeriodDuration)),
                               SizedBox(
                                 width: 64,
                                 child: TextFormField(
                                   controller: _periodDurCtrl,
                                   keyboardType: TextInputType.number,
                                   textAlign: TextAlign.center,
-                                  decoration: const InputDecoration(
-                                    suffixText: 'days',
-                                    border: OutlineInputBorder(),
-                                    contentPadding: EdgeInsets.symmetric(
+                                  decoration: InputDecoration(
+                                    suffixText: l.days,
+                                    border: const OutlineInputBorder(),
+                                    contentPadding: const EdgeInsets.symmetric(
                                       horizontal: 8,
                                       vertical: 8,
                                     ),
@@ -426,16 +455,16 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          'Create Account',
-                          style: TextStyle(fontSize: 16),
+                      : Text(
+                          l.createAccount,
+                          style: const TextStyle(fontSize: 16),
                         ),
                 ),
                 const SizedBox(height: 16),
                 Center(
                   child: TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Already have an account? Log in'),
+                    child: Text(l.alreadyHaveAccount),
                   ),
                 ),
                 const SizedBox(height: 16),

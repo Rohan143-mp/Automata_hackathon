@@ -1,33 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import '../../services/api_service.dart';
+import '../../services/locale_provider.dart';
 import '../../core/constants/app_constants.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  static const _categoryLabels = {
-    'general': 'General Wellness',
-    'pregnancy': 'Pregnancy',
-    'epilepsy': 'Epilepsy / Seizures',
-    'autism': 'Autism Spectrum (ASD)',
-    'diabetes1': 'Type 1 Diabetes',
-    'diabetes2': 'Type 2 Diabetes',
-    'hypertension': 'Hypertension (High BP)',
-    'heart': 'Heart Condition',
-    'asthma': 'Asthma / Respiratory',
-    'anxiety': 'Anxiety / Mental Health',
-    'disability': 'Physical Disability',
-    'surgery': 'Post-Surgery Recovery',
-    'elderly': 'Elderly / Senior Care',
-  };
+  static String _categoryLabel(AppLocalizations l, String id) {
+    switch (id) {
+      case 'general':
+        return l.catGeneral;
+      case 'pregnancy':
+        return l.catPregnancy;
+      case 'epilepsy':
+        return l.catEpilepsy;
+      case 'autism':
+        return l.catAutism;
+      case 'diabetes1':
+        return l.catDiabetes1;
+      case 'diabetes2':
+        return l.catDiabetes2;
+      case 'hypertension':
+        return l.catHypertension;
+      case 'heart':
+        return l.catHeart;
+      case 'asthma':
+        return l.catAsthma;
+      case 'anxiety':
+        return l.catAnxiety;
+      case 'disability':
+        return l.catDisability;
+      case 'surgery':
+        return l.catSurgery;
+      case 'elderly':
+        return l.catElderly;
+      default:
+        return id;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
-    final gender = ApiService.currentGender ?? 'Not set';
+    final l = AppLocalizations.of(context)!;
+    final gender = ApiService.currentGender ?? l.notSet;
     final emergency = ApiService.emergencyContact;
     final categories = ApiService.healthCategories;
+    final localeProvider = Provider.of<LocaleProvider>(context);
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
@@ -51,7 +73,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 SizedBox(height: isSmallScreen ? 12 : 16),
                 Text(
-                  ApiService.currentStudentName ?? 'Student',
+                  ApiService.currentStudentName ?? l.student,
                   style: TextStyle(
                     fontSize: isSmallScreen ? 24 : 26,
                     fontWeight: FontWeight.bold,
@@ -59,7 +81,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Student ID: ${ApiService.currentUserId ?? '-'}',
+                  l.studentIdLabel(ApiService.currentUserId ?? '-'),
                   style: TextStyle(color: Colors.grey[600], fontSize: 13),
                 ),
               ],
@@ -69,27 +91,65 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 24),
           const Divider(),
 
+          // ── Language selector ──────────────────────────────────────────
+          _sectionHeader(context, l.language),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: LocaleProvider.supportedLocales.map((locale) {
+                final code = locale.languageCode;
+                final name = LocaleProvider.languageNames[code] ?? code;
+                final isSelected =
+                    localeProvider.locale?.languageCode == code ||
+                    (localeProvider.locale == null && code == 'en');
+                return RadioListTile<String>(
+                  value: code,
+                  groupValue: localeProvider.locale?.languageCode ?? 'en',
+                  onChanged: (value) {
+                    if (value != null) {
+                      localeProvider.setLocale(Locale(value));
+                    }
+                  },
+                  title: Text(
+                    name,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
+                  ),
+                  dense: true,
+                  activeColor: Theme.of(context).colorScheme.primary,
+                );
+              }).toList(),
+            ),
+          ),
+
           // ── Personal info ─────────────────────────────────────────────
-          _sectionHeader(context, 'Personal Information'),
-          _infoTile(Icons.wc, 'Gender', gender),
+          _sectionHeader(context, l.personalInformation),
+          _infoTile(Icons.wc, l.gender, gender),
 
           // ── Emergency contact ─────────────────────────────────────────
-          _sectionHeader(context, 'Emergency Contact'),
+          _sectionHeader(context, l.emergencyContact),
           _infoTile(
             Icons.emergency,
-            'Contact Number',
-            emergency.isEmpty ? 'Not provided' : emergency,
+            l.contactNumber,
+            emergency.isEmpty ? l.notProvided : emergency,
             valueColor: emergency.isEmpty ? Colors.grey : Colors.red.shade700,
             iconColor: Colors.red,
           ),
 
           // ── Health profile ────────────────────────────────────────────
-          _sectionHeader(context, 'Health Profile'),
+          _sectionHeader(context, l.healthProfile),
           if (categories.isEmpty)
             Padding(
               padding: const EdgeInsets.only(left: 8, bottom: 8),
               child: Text(
-                'No categories selected',
+                l.noCategoriesSelected,
                 style: TextStyle(color: Colors.grey[600]),
               ),
             )
@@ -98,7 +158,7 @@ class ProfileScreen extends StatelessWidget {
               spacing: 8,
               runSpacing: 6,
               children: categories.map((id) {
-                final label = _categoryLabels[id] ?? id;
+                final label = _categoryLabel(l, id);
                 return Chip(
                   label: Text(label, style: const TextStyle(fontSize: 12)),
                   backgroundColor: Theme.of(
@@ -112,25 +172,25 @@ class ProfileScreen extends StatelessWidget {
 
           // ── Menstrual cycle (female only) ─────────────────────────────
           if (ApiService.currentGender == 'Female') ...[
-            _sectionHeader(context, 'Menstrual Cycle'),
+            _sectionHeader(context, l.menstrualCycle),
             _infoTile(
               Icons.calendar_today,
-              'Last Period',
+              l.lastPeriod,
               ApiService.lastPeriodDate == null
-                  ? 'Not set'
+                  ? l.notSet
                   : '${ApiService.lastPeriodDate!.day}/'
                         '${ApiService.lastPeriodDate!.month}/'
                         '${ApiService.lastPeriodDate!.year}',
             ),
             _infoTile(
               Icons.loop,
-              'Cycle Length',
-              '${ApiService.menstrualCycleLength} days',
+              l.cycleLength,
+              '${ApiService.menstrualCycleLength} ${l.days}',
             ),
             _infoTile(
               Icons.water_drop,
-              'Period Duration',
-              '${ApiService.menstrualPeriodDuration} days',
+              l.periodDuration,
+              '${ApiService.menstrualPeriodDuration} ${l.days}',
             ),
           ],
 
@@ -139,7 +199,7 @@ class ProfileScreen extends StatelessWidget {
           // ── Logout ────────────────────────────────────────────────────
           ElevatedButton.icon(
             icon: const Icon(Icons.logout),
-            label: const Text('Logout'),
+            label: Text(l.logout),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,

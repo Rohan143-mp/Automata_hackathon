@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -13,6 +14,7 @@ class CustomBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final l = AppLocalizations.of(context)!;
     return BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: onTap,
@@ -21,15 +23,15 @@ class CustomBottomNavBar extends StatelessWidget {
       unselectedItemColor: Colors.grey,
       selectedFontSize: size.width < 360 ? 12 : 14,
       unselectedFontSize: size.width < 360 ? 10 : 12,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'Vitals'),
-        BottomNavigationBarItem(icon: Icon(Icons.sign_language), label: 'Sign'),
+      items: [
+        BottomNavigationBarItem(icon: const Icon(Icons.home), label: l.navHome),
+        BottomNavigationBarItem(icon: const Icon(Icons.show_chart), label: l.navVitals),
+        BottomNavigationBarItem(icon: const Icon(Icons.sign_language), label: l.navSign),
         BottomNavigationBarItem(
-          icon: Icon(Icons.psychology),
-          label: 'AI Tutor',
+          icon: const Icon(Icons.psychology),
+          label: l.navAiTutor,
         ),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        BottomNavigationBarItem(icon: const Icon(Icons.person), label: l.navProfile),
       ],
     );
   }

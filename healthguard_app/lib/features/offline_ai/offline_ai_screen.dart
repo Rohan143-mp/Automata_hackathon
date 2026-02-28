@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 import '../../services/ollama_service.dart';
 import '../../services/speech_service.dart';
 
@@ -35,11 +36,10 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
     super.initState();
     _initTts();
     _checkConnection();
-    _addBotMessage(
-      '👋 Hi! I\'m your AI Tutor. I\'m here to help you learn at your own pace.\n\n'
-      'You can ask me anything, upload a textbook chapter for a summary, '
-      'use the quick buttons below, or click the microphone icon for voice input!',
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final l = AppLocalizations.of(context)!;
+      _addBotMessage('👋 ${l.aiTutorWelcome}');
+    });
   }
 
   /// Initialize text-to-speech settings
@@ -124,10 +124,11 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
   }
 
   Future<void> _uploadMaterial() async {
+    final l = AppLocalizations.of(context)!;
     if (!_isConnected) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please connect to Ollama first')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l.connectToOllama)));
       return;
     }
 
@@ -147,12 +148,12 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
         if (bytes == null) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('Failed to read file')));
+          ).showSnackBar(SnackBar(content: Text(l.failedToReadFile)));
           return;
         }
 
         setState(() => _isSummarizing = true);
-        _addBotMessage('📚 Summarizing your material…');
+        _addBotMessage('📚 ${l.summarizingMaterial}');
 
         final summary = await _ollama.summarizeMaterial(bytes, filename);
 
@@ -161,22 +162,18 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
 
           if (summary != null && summary.startsWith('ERROR:')) {
             final errorDetail = summary.substring(6);
-            _addBotMessage(
-              '❌ Failed to summarize: $errorDetail\n\nPlease check that Ollama is running and try again.',
-            );
+            _addBotMessage('❌ ${l.failedToSummarize}: $errorDetail');
           } else if (summary != null && summary.isNotEmpty) {
-            _addBotMessage('📄 **Summary: $filename**\n\n$summary');
+            _addBotMessage('📄 **${l.summaryTitle(filename)}**\n\n$summary');
           } else {
-            _addBotMessage(
-              '❌ Failed to summarize the material. Please try again or ask me questions about it directly!',
-            );
+            _addBotMessage('❌ ${l.failedToSummarizeMaterial}');
           }
         }
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isSummarizing = false);
-        _addBotMessage('❌ Error uploading file: $e');
+        _addBotMessage('❌ ${l.errorUploadingFile}: $e');
       }
     }
   }
@@ -205,16 +202,18 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
     if (!mounted) return;
     if (started) {
       setState(() => _isRecording = true);
+      final l = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('🎤 Listening... speak now'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text('🎤 ${l.listeningSpeak}'),
+          duration: const Duration(seconds: 2),
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('❌ Speech recognition not available')),
-      );
+      final l = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('❌ ${l.speechNotAvailable}')));
     }
   }
 
@@ -264,11 +263,12 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
     final size = MediaQuery.of(context).size;
     final isSmall = size.width < 380;
     final colorScheme = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context)!;
 
     return Column(
       children: [
         // ── Connection banner ──────────────────────────────────────
-        _buildConnectionBanner(colorScheme),
+        _buildConnectionBanner(colorScheme, l),
 
         // ── Toolbar: Upload + TTS ──────────────────────────────────
         Container(
@@ -279,7 +279,7 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
               ElevatedButton.icon(
                 onPressed: _isSummarizing ? null : _uploadMaterial,
                 icon: const Icon(Icons.upload_file, size: 18),
-                label: const Text('📚 Upload'),
+                label: Text('📚 ${l.upload}'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -329,7 +329,7 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
                 onPressed: () {
                   setState(() => _ttsEnabled = !_ttsEnabled);
                   if (_ttsEnabled) {
-                    _tts.speak('Text-to-speech enabled');
+                    _tts.speak(l.ttsEnabled);
                   }
                 },
                 icon: Icon(
@@ -338,9 +338,7 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
                       ? colorScheme.primary
                       : colorScheme.outlineVariant,
                 ),
-                tooltip: _ttsEnabled
-                    ? 'TTS On (replies will be read aloud)'
-                    : 'TTS Off',
+                tooltip: _ttsEnabled ? l.ttsOn : l.ttsOff,
               ),
             ],
           ),
@@ -372,7 +370,7 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        'Thinking…',
+                        l.thinking,
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontStyle: FontStyle.italic,
@@ -424,22 +422,14 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   _quickActionChip(
-                    'Explain Simply',
-                    'Please explain this in simpler words',
+                    l.explainSimply,
+                    l.explainSimplyPrompt,
                     colorScheme,
                   ),
                   const SizedBox(width: 8),
-                  _quickActionChip(
-                    'Quiz Me',
-                    'Ask me 3 questions about what we just discussed',
-                    colorScheme,
-                  ),
+                  _quickActionChip(l.quizMe, l.quizMePrompt, colorScheme),
                   const SizedBox(width: 8),
-                  _quickActionChip(
-                    'Summarize',
-                    'Summarize what we\'ve covered so far',
-                    colorScheme,
-                  ),
+                  _quickActionChip(l.summarize, l.summarizePrompt, colorScheme),
                 ],
               ),
             ),
@@ -469,9 +459,7 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
                       ? Colors.red.shade400
                       : colorScheme.primary,
                 ),
-                tooltip: _isRecording
-                    ? 'Stop recording'
-                    : 'Start voice input (for disabled students)',
+                tooltip: _isRecording ? l.stopRecording : l.startVoiceInput,
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -479,8 +467,8 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
                   controller: _controller,
                   decoration: InputDecoration(
                     hintText: _isConnected
-                        ? 'Type or use 🎤 for voice input…'
-                        : 'Tutor not available…',
+                        ? l.typeOrVoice
+                        : l.tutorNotAvailable,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(24),
                     ),
@@ -527,7 +515,7 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
     );
   }
 
-  Widget _buildConnectionBanner(ColorScheme colorScheme) {
+  Widget _buildConnectionBanner(ColorScheme colorScheme, AppLocalizations l) {
     if (_isCheckingConnection) {
       return Container(
         width: double.infinity,
@@ -544,9 +532,9 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            const Text(
-              'Checking tutor connection…',
-              style: TextStyle(fontSize: 13),
+            Text(
+              l.checkingTutorConnection,
+              style: const TextStyle(fontSize: 13),
             ),
           ],
         ),
@@ -565,7 +553,7 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
               Icon(Icons.check_circle, size: 16, color: Colors.green.shade700),
               const SizedBox(width: 8),
               Text(
-                'Tutor connected • ${OllamaService.modelName}',
+                '${l.tutorConnected} • ${OllamaService.modelName}',
                 style: TextStyle(fontSize: 13, color: Colors.green.shade800),
               ),
             ],
@@ -590,7 +578,7 @@ class _OfflineAiScreenState extends State<OfflineAiScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Tutor offline — retrying automatically…',
+                    l.tutorOffline,
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,

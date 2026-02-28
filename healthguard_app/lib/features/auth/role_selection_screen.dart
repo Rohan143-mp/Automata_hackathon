@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile/l10n/app_localizations.dart';
 import '../../core/constants/app_constants.dart';
 import '../../services/api_service.dart';
 
@@ -24,8 +25,9 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
     try {
       final uri = Uri.parse('${ApiService.baseUrl}/');
       final response = await http.get(uri).timeout(const Duration(seconds: 4));
-      if (mounted)
+      if (mounted) {
         setState(() => _backendConnected = response.statusCode == 200);
+      }
     } catch (_) {
       if (mounted) setState(() => _backendConnected = false);
     }
@@ -35,6 +37,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 360;
+    final l = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: Center(
@@ -44,7 +47,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Welcome to ${AppConstants.appName}',
+                l.welcomeTo(AppConstants.appName),
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   fontSize: isSmallScreen ? 24 : 28,
@@ -52,24 +55,23 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              // ── Backend connection status pill ──────────────────────
               GestureDetector(
                 onTap: _checkBackendConnection,
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
                   child: _backendConnected == null
-                      ? const Row(
+                      ? Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            SizedBox(
+                            const SizedBox(
                               width: 12,
                               height: 12,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             ),
-                            SizedBox(width: 6),
+                            const SizedBox(width: 6),
                             Text(
-                              'Checking backend…',
-                              style: TextStyle(
+                              l.checkingBackend,
+                              style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey,
                               ),
@@ -89,8 +91,8 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                           ),
                           label: Text(
                             _backendConnected!
-                                ? 'Backend Connected'
-                                : 'No Backend — Tap to retry',
+                                ? l.backendConnected
+                                : l.noBackendTapRetry,
                             style: TextStyle(
                               fontSize: 11,
                               color: _backendConnected!
@@ -125,7 +127,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                   minimumSize: Size(size.width * 0.8, 56),
                   textStyle: TextStyle(fontSize: isSmallScreen ? 16 : 18),
                 ),
-                child: const Text('Continue as Student'),
+                child: Text(l.continueAsStudent),
               ),
               const SizedBox(height: 24),
               OutlinedButton(
@@ -136,7 +138,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                   minimumSize: Size(size.width * 0.8, 56),
                   textStyle: TextStyle(fontSize: isSmallScreen ? 16 : 18),
                 ),
-                child: const Text('Continue as Doctor'),
+                child: Text(l.continueAsDoctor),
               ),
             ],
           ),

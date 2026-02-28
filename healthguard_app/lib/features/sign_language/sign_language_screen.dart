@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class SignLanguageScreen extends StatefulWidget {
   const SignLanguageScreen({super.key});
@@ -222,6 +223,7 @@ class _SignLanguageScreenState extends State<SignLanguageScreen>
       const Color(0xFF9C27B0), // Pinky  – purple
     ];
     final fingerLabels = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky'];
+    final l = AppLocalizations.of(context)!;
     final fingerIcons = [
       Icons.thumb_up_alt_outlined,
       Icons.back_hand_outlined,
@@ -255,9 +257,12 @@ class _SignLanguageScreenState extends State<SignLanguageScreen>
                     },
                   ),
                   const SizedBox(width: 10),
-                  const Text(
-                    'Sign Language IoT',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  Text(
+                    l.signLanguageIot,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -280,14 +285,14 @@ class _SignLanguageScreenState extends State<SignLanguageScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'PC Hub: Connected',
+                            l.pcHubConnected,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.green.shade700,
                             ),
                           ),
                           Text(
-                            'Receiving real-time glove transmissions',
+                            l.receivingTransmissions,
                             style: TextStyle(
                               fontSize: 11,
                               color: Colors.grey.shade600,
@@ -347,13 +352,16 @@ class _SignLanguageScreenState extends State<SignLanguageScreen>
               const SizedBox(height: 24),
 
               // ── Section: AI Output ───────────────────────────────────
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.auto_awesome, size: 20),
-                  SizedBox(width: 8),
+                  const Icon(Icons.auto_awesome, size: 20),
+                  const SizedBox(width: 8),
                   Text(
-                    'AI Translation (Ollama)',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    l.aiTranslation,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -396,7 +404,7 @@ class _SignLanguageScreenState extends State<SignLanguageScreen>
                     const SizedBox(height: 6),
                     Text(
                       _displayedIntent.isEmpty
-                          ? "WAITING..."
+                          ? l.waiting
                           : _displayedIntent.toUpperCase(),
                       style: const TextStyle(
                         color: Colors.white,
@@ -415,7 +423,7 @@ class _SignLanguageScreenState extends State<SignLanguageScreen>
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'LLM Fluent Speech:',
+                            l.llmFluentSpeech,
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.9),
                               fontSize: 14,
@@ -433,7 +441,7 @@ class _SignLanguageScreenState extends State<SignLanguageScreen>
                         ),
                         child: Text(
                           _latestSpeech.isEmpty
-                              ? "Waiting for Ollama..."
+                              ? l.waitingForOllama
                               : '"$_latestSpeech"',
                           style: const TextStyle(
                             color: Colors.white,
@@ -450,7 +458,7 @@ class _SignLanguageScreenState extends State<SignLanguageScreen>
 
               const SizedBox(height: 16),
               Text(
-                '🔗 Live mode — connected to PC Hub. Flex values from smart glove in real-time.',
+                '🔗 ${l.liveModeConnected}',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey.shade600,

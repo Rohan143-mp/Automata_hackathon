@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 import '../../services/api_service.dart';
 
 class DoctorLoginScreen extends StatefulWidget {
@@ -30,15 +31,16 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
       Navigator.pushReplacementNamed(context, '/doctor_dashboard');
     } else {
       setState(() {
-        _error = 'Invalid credentials';
+        _error = AppLocalizations.of(context)!.invalidCredentials;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Doctor Login')),
+      appBar: AppBar(title: Text(l.doctorLogin)),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -46,12 +48,12 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
           children: [
             TextField(
               controller: _mobileController,
-              decoration: const InputDecoration(labelText: 'Mobile'),
+              decoration: InputDecoration(labelText: l.mobile),
               keyboardType: TextInputType.phone,
             ),
             TextField(
               controller: _pinController,
-              decoration: const InputDecoration(labelText: 'PIN'),
+              decoration: InputDecoration(labelText: l.pin),
               obscureText: true,
             ),
             const SizedBox(height: 24),
@@ -61,13 +63,13 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
               onPressed: _loading ? null : _login,
               child: _loading
                   ? const CircularProgressIndicator()
-                  : const Text('Login'),
+                  : Text(l.login),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/doctor_signup');
               },
-              child: const Text('Register as Doctor'),
+              child: Text(l.registerAsDoctor),
             ),
           ],
         ),

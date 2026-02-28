@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 import '../../services/api_service.dart';
 
 class DoctorPatientVitalsScreen extends StatelessWidget {
@@ -6,6 +7,7 @@ class DoctorPatientVitalsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final routeArg = ModalRoute.of(context)?.settings.arguments;
     String? patientId;
     if (routeArg != null) {
@@ -17,13 +19,13 @@ class DoctorPatientVitalsScreen extends StatelessWidget {
     }
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Patient Vitals'),
+        title: Text(l.patientVitals),
         actions: [
           if (patientId != null) VitalsReloadButton(patientId: patientId),
         ],
       ),
       body: patientId == null
-          ? const Center(child: Text('No patient selected'))
+          ? Center(child: Text(l.noPatientSelected))
           : VitalsFutureBody(patientId: patientId),
     );
   }
@@ -55,6 +57,7 @@ class VitalsFutureBodyState extends State<VitalsFutureBody> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return FutureBuilder<Map<String, dynamic>?>(
       future: _vitalsFuture,
       builder: (context, snapshot) {
@@ -63,7 +66,7 @@ class VitalsFutureBodyState extends State<VitalsFutureBody> {
         }
         final vitals = snapshot.data;
         if (vitals == null) {
-          return const Center(child: Text('Failed to load vitals'));
+          return Center(child: Text(l.failedToLoadVitals));
         }
 
         return SingleChildScrollView(
@@ -72,15 +75,15 @@ class VitalsFutureBodyState extends State<VitalsFutureBody> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Health Summary Card
-              _buildSummaryCard(vitals),
+              _buildSummaryCard(vitals, l),
               const SizedBox(height: 24),
 
               Text(
-                'Key Health Indicators',
+                l.keyHealthIndicators,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade800,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade800,
+                ),
               ),
               const SizedBox(height: 16),
 
@@ -94,42 +97,42 @@ class VitalsFutureBodyState extends State<VitalsFutureBody> {
                 childAspectRatio: 1.1,
                 children: [
                   _vitalBox(
-                    'Heart Rate',
+                    l.heartRate,
                     '${vitals['heart_rate'] ?? '-'}',
                     'BPM',
                     Icons.favorite,
                     Colors.red,
                   ),
                   _vitalBox(
-                    'Blood Pressure',
+                    l.bloodPressure,
                     '${vitals['bp'] ?? '-'}',
                     'mmHg',
                     Icons.bloodtype,
                     Colors.blue,
                   ),
                   _vitalBox(
-                    'Glucose',
+                    l.glucose,
                     '${vitals['glucose'] ?? '-'}',
                     'mg/dL',
                     Icons.opacity,
                     Colors.purple,
                   ),
                   _vitalBox(
-                    'Today\'s Steps',
+                    l.todaysSteps,
                     '${vitals['steps'] ?? '-'}',
                     'steps',
                     Icons.directions_walk,
                     Colors.orange,
                   ),
                   _vitalBox(
-                    'Calories',
+                    l.calories,
                     '${vitals['calories'] ?? '-'}',
                     'kcal',
                     Icons.local_fire_department,
                     Colors.deepOrange,
                   ),
                   _vitalBox(
-                    'Active Time',
+                    l.activeTime,
                     '${vitals['active_min'] ?? '-'}',
                     'min',
                     Icons.access_time,
@@ -144,17 +147,17 @@ class VitalsFutureBodyState extends State<VitalsFutureBody> {
     );
   }
 
-  Widget _buildSummaryCard(Map<String, dynamic> vitals) {
+  Widget _buildSummaryCard(Map<String, dynamic> vitals, AppLocalizations l) {
     // Basic logic for health status
     final int hr = int.tryParse(vitals['heart_rate']?.toString() ?? '0') ?? 0;
-    String status = "Normal";
+    String status = l.normal;
     Color statusColor = Colors.green;
-    String message = "All vitals are within normal range.";
+    String message = l.allVitalsNormal;
 
     if (hr > 100 || hr < 60 && hr != 0) {
-      status = "Attention Required";
+      status = l.attentionRequired;
       statusColor = Colors.orange;
-      message = "Heart rate is outside the optimal range.";
+      message = l.heartRateOutsideOptimal;
     }
 
     return Container(
@@ -173,7 +176,7 @@ class VitalsFutureBodyState extends State<VitalsFutureBody> {
               Icon(Icons.info_outline, color: statusColor),
               const SizedBox(width: 10),
               Text(
-                'Health Status: $status',
+                l.healthStatusLabel(status),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -183,16 +186,19 @@ class VitalsFutureBodyState extends State<VitalsFutureBody> {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            message,
-            style: TextStyle(color: Colors.grey.shade700),
-          ),
+          Text(message, style: TextStyle(color: Colors.grey.shade700)),
         ],
       ),
     );
   }
 
-  Widget _vitalBox(String label, String value, String unit, IconData icon, Color color) {
+  Widget _vitalBox(
+    String label,
+    String value,
+    String unit,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -226,10 +232,7 @@ class VitalsFutureBodyState extends State<VitalsFutureBody> {
                 const SizedBox(width: 4),
                 Text(
                   unit,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 ),
               ],
             ),
@@ -238,10 +241,7 @@ class VitalsFutureBodyState extends State<VitalsFutureBody> {
           Text(
             label,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey.shade700,
-            ),
+            style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
           ),
         ],
       ),
@@ -259,9 +259,10 @@ class VitalsReloadButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return IconButton(
       icon: const Icon(Icons.refresh),
-      tooltip: 'Reload Vitals',
+      tooltip: l.reloadVitals,
       onPressed: () {
         final state = VitalsFutureBodyState.of(context);
         state?.reloadVitals();

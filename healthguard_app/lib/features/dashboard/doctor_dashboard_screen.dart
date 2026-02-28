@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 import '../../services/api_service.dart';
 
 class DoctorDashboardScreen extends StatefulWidget {
@@ -17,8 +18,9 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Doctor Dashboard')),
+      appBar: AppBar(title: Text(l.doctorDashboard)),
       body: IndexedStack(
         index: _tabIndex,
         children: [
@@ -30,13 +32,19 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _tabIndex,
         onTap: (i) => setState(() => _tabIndex = i),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Appointments',
+            icon: const Icon(Icons.person),
+            label: l.profile,
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Patients'),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.calendar_today),
+            label: l.appointments,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.people),
+            label: l.patients,
+          ),
         ],
       ),
     );
@@ -48,6 +56,7 @@ class DoctorProfileTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return FutureBuilder<List<dynamic>>(
       future: Future.wait([
         ApiService().getDoctorInfo(ApiService.currentDoctorId ?? ''),
@@ -59,7 +68,7 @@ class DoctorProfileTab extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError || snapshot.data == null) {
-          return const Center(child: Text('Failed to load profile'));
+          return Center(child: Text(l.failedToLoadProfile));
         }
 
         final doctorInfo = snapshot.data![0] as Map<String, dynamic>?;
@@ -67,7 +76,7 @@ class DoctorProfileTab extends StatelessWidget {
         final patients = snapshot.data![2] as List<dynamic>? ?? [];
 
         if (doctorInfo == null) {
-          return const Center(child: Text('Doctor info not found'));
+          return Center(child: Text(l.doctorInfoNotFound));
         }
 
         return SingleChildScrollView(
@@ -163,7 +172,7 @@ class DoctorProfileTab extends StatelessWidget {
                   Expanded(
                     child: _buildStatCard(
                       context,
-                      'Total Patients',
+                      l.totalPatients,
                       patients.length.toString(),
                       Icons.people_outline,
                       Colors.orange,
@@ -173,7 +182,7 @@ class DoctorProfileTab extends StatelessWidget {
                   Expanded(
                     child: _buildStatCard(
                       context,
-                      'Appointments',
+                      l.appointments,
                       appointments.length.toString(),
                       Icons.calendar_month_outlined,
                       Colors.green,
@@ -194,9 +203,9 @@ class DoctorProfileTab extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Practice Details',
-                        style: TextStyle(
+                      Text(
+                        l.practiceDetails,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -204,19 +213,19 @@ class DoctorProfileTab extends StatelessWidget {
                       const SizedBox(height: 16),
                       _buildDetailRow(
                         Icons.location_on_outlined,
-                        'Clinic Location',
-                        'signify Medical Center',
+                        l.clinicLocation,
+                        l.signifyMedicalCenter,
                       ),
                       const Divider(height: 24),
                       _buildDetailRow(
                         Icons.access_time,
-                        'Available Hours',
+                        l.availableHours,
                         '09:00 AM - 05:00 PM',
                       ),
                       const Divider(height: 24),
                       _buildDetailRow(
                         Icons.verified_user_outlined,
-                        'Doctor ID',
+                        l.doctorId,
                         '#${ApiService.currentDoctorId}',
                       ),
                     ],
@@ -328,6 +337,7 @@ class _DoctorAppointmentsTabState extends State<DoctorAppointmentsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Column(
       children: [
         Padding(
@@ -337,7 +347,7 @@ class _DoctorAppointmentsTabState extends State<DoctorAppointmentsTab> {
             children: [
               IconButton(
                 icon: const Icon(Icons.refresh),
-                tooltip: 'Reload Appointments',
+                tooltip: l.reloadAppointments,
                 onPressed: _reloadAppointments,
               ),
             ],
@@ -352,7 +362,7 @@ class _DoctorAppointmentsTabState extends State<DoctorAppointmentsTab> {
               }
               final appointments = snapshot.data ?? [];
               if (appointments.isEmpty) {
-                return const Center(child: Text('No appointments'));
+                return Center(child: Text(l.noAppointments));
               }
               return ListView.builder(
                 itemCount: appointments.length,
@@ -378,10 +388,10 @@ class _DoctorAppointmentsTabState extends State<DoctorAppointmentsTab> {
                         appt['name'] ?? appt['patient_id'] ?? '-',
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
-                      subtitle: Text('Time: ${appt['time'] ?? '-'}'),
+                      subtitle: Text(l.timeLabel(appt['time'] ?? '-')),
                       trailing: confirmed
                           ? Chip(
-                              label: const Text('Confirmed'),
+                              label: Text(l.confirmed),
                               backgroundColor: Theme.of(
                                 context,
                               ).colorScheme.secondary,
@@ -408,7 +418,7 @@ class _DoctorAppointmentsTabState extends State<DoctorAppointmentsTab> {
                                   }
                                 }
                               },
-                              child: const Text('Confirm'),
+                              child: Text(l.confirm),
                             ),
                     ),
                   );
@@ -451,6 +461,7 @@ class _DoctorPatientsTabState extends State<DoctorPatientsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Column(
       children: [
         Padding(
@@ -459,7 +470,7 @@ class _DoctorPatientsTabState extends State<DoctorPatientsTab> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'My Patients',
+                l.myPatients,
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -467,7 +478,7 @@ class _DoctorPatientsTabState extends State<DoctorPatientsTab> {
               Row(
                 children: [
                   ChoiceChip(
-                    label: const Text('Priority Sort'),
+                    label: Text(l.prioritySort),
                     selected: _sortByPriority,
                     onSelected: (val) => setState(() => _sortByPriority = val),
                     selectedColor: Colors.red.shade100,
@@ -484,7 +495,7 @@ class _DoctorPatientsTabState extends State<DoctorPatientsTab> {
                   const SizedBox(width: 8),
                   IconButton(
                     icon: const Icon(Icons.refresh),
-                    tooltip: 'Reload Patients',
+                    tooltip: l.reloadPatients,
                     onPressed: _reloadPatients,
                   ),
                 ],
@@ -501,7 +512,7 @@ class _DoctorPatientsTabState extends State<DoctorPatientsTab> {
               }
               List<dynamic> patients = snapshot.data ?? [];
               if (patients.isEmpty) {
-                return const Center(child: Text('No patients'));
+                return Center(child: Text(l.noPatients));
               }
 
               if (_sortByPriority) {
@@ -568,7 +579,7 @@ class _DoctorPatientsTabState extends State<DoctorPatientsTab> {
                                 ),
                               ),
                               child: Text(
-                                'Priority: $priorityLevel',
+                                l.priorityLevel(priorityLevel.toString()),
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: _getPriorityColor(priorityLevel),
